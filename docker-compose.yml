@@ -1,0 +1,14 @@
+version: '2'
+
+services:
+
+  db:
+    container_name: cms-db
+    image: postgres:9.5-alpine
+    environment:
+      POSTGRES_DB: cms
+      POSTGRES_USER: cms
+      POSTGRES_PASSWORD: cms
+    ports:
+      - "5555:5432"
+    restart: always
