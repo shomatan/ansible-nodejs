@@ -1,14 +1,22 @@
 name := "play_cms"
- 
-version := "1.0" 
-      
-lazy val `play_cms` = (project in file(".")).enablePlugins(PlayScala)
+
+lazy val commonSettings = Seq(
+  organization := "shoma.me",
+  version := "0.1.0",
+  scalaVersion := "2.12.2"
+)
+
+lazy val `play_cms` = (project in file("."))
+  .enablePlugins(PlayScala)
+  .settings(
+    commonSettings
+  )
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
       
 resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
-      
-scalaVersion := "2.12.2"
+
+resolvers += Resolver.jcenterRepo
 
 val silhouetteVer = "5.0.0-RC2"
 
@@ -19,6 +27,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play"       %% "play-slick"                       % "3.0.0",
   "com.typesafe.play"       %% "play-slick-evolutions"            % "3.0.0",
   "org.postgresql"          %  "postgresql"                       % "42.1.1",
+  "net.codingwell"          %% "scala-guice"                      % "4.1.0",
   "com.iheart"              %% "ficus"                            % "1.4.1",        // config lib, used by Silhouette,
   "com.mohiva"              %% "play-silhouette"                  % silhouetteVer,
   "com.mohiva"              %% "play-silhouette"                  % silhouetteVer,
@@ -32,7 +41,3 @@ libraryDependencies ++= Seq(
 )
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
-
-resolvers += Resolver.jcenterRepo
-
-resolvers += "scalaz-bintray" at "http://dl.bintray.com/scalaz/releases"
