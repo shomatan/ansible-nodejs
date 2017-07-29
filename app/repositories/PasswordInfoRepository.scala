@@ -1,4 +1,4 @@
-package repositories
+package me.shoma.play_cms.repositories
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -7,7 +7,6 @@ import javax.inject.Inject
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.util.PasswordInfo
 import com.mohiva.play.silhouette.persistence.daos.DelegableAuthInfoDAO
-import me.shoma.play_cms.repositories.RepositorySlick
 import play.api.db.slick.DatabaseConfigProvider
 
 /**

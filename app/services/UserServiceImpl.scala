@@ -1,4 +1,4 @@
-package services
+package me.shoma.play_cms.services
 
 import javax.inject.Inject
 
