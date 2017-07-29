@@ -1,16 +1,18 @@
 package me.shoma.play_cms.modules
 
 import play.api.Configuration
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import play.api.libs.concurrent.AkkaGuiceSupport
 import play.api.libs.ws.WSClient
-import play.api.libs.json.Json
+
 import net.ceedubs.ficus.Ficus._
 import net.ceedubs.ficus.readers.ArbitraryTypeReader._
+
 import net.ceedubs.ficus.readers.EnumerationReader._
 import net.codingwell.scalaguice.ScalaModule
+
 import com.google.inject.{AbstractModule, Provides}
 import com.google.inject.name.Named
+
 import com.mohiva.play.silhouette.api.{Environment, EventBus, Silhouette, SilhouetteProvider}
 import com.mohiva.play.silhouette.api.crypto.{Crypter, CrypterAuthenticatorEncoder}
 import com.mohiva.play.silhouette.api.repositories.AuthInfoRepository
@@ -23,10 +25,13 @@ import com.mohiva.play.silhouette.impl.util.SecureRandomIDGenerator
 import com.mohiva.play.silhouette.password.BCryptPasswordHasher
 import com.mohiva.play.silhouette.persistence.daos.{DelegableAuthInfoDAO, InMemoryAuthInfoDAO}
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
+
 import me.shoma.play_cms.services.UserService
 import me.shoma.play_cms.utils.authentication.DefaultEnv
 import repositories.PasswordInfoRepository
 import services.UserServiceImpl
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 /** The Guice module which wires all Silhouette dependencies.
   */
