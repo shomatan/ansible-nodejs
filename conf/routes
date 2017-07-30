@@ -3,5 +3,8 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
+# Posts
+GET     /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.posts
+
 # Authentication
 POST    /api/v1/auth/signUp         me.shoma.play_cms.controllers.api.v1.auth.SignUpController.submit
