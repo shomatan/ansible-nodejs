@@ -4,7 +4,8 @@
 # ~~~~
 
 # Posts
-GET     /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.posts
+GET     /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.list
+POST    /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.post
 
 # Authentication
 POST    /api/v1/auth/signUp         me.shoma.play_cms.controllers.api.v1.auth.SignUpController.submit
