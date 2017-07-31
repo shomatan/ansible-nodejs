@@ -29,7 +29,43 @@ create table password_info (
   login_info_id BIGINT NOT NULL
 );
 
+create table posts (
+    post_id     BIGSERIAL PRIMARY KEY
+  , title       VARCHAR   NOT NULL
+  , content     TEXT      NOT NULL
+  , created_at  BIGINT    NOT NULL
+  , updated_at  BIGINT    NOT NULL
+);
+
+create table categories (
+    category_id BIGSERIAL PRIMARY KEY
+  , name        VARCHAR   NOT NULL
+);
+
+create table tags (
+    tag_id  BIGSERIAL PRIMARY KEY
+  , tag     VARCHAR   NOT NULL
+);
+
+CREATE TABLE post_category (
+    category_id   int REFERENCES categories (category_id)   ON UPDATE CASCADE
+  , post_id       int REFERENCES posts (post_id)            ON UPDATE CASCADE
+  , CONSTRAINT post_category_pkey PRIMARY KEY (category_id, post_id)  -- explicit pk
+);
+
+CREATE TABLE post_tag (
+    tag_id        int REFERENCES tags (tag_id)              ON UPDATE CASCADE
+  , post_id       int REFERENCES posts (post_id)            ON UPDATE CASCADE
+  , CONSTRAINT post_tag_pkey PRIMARY KEY (tag_id, post_id)  -- explicit pk
+);
+
 # --- !Downs
+
+drop table post_tag;
+drop table post_category;
+drop table tags;
+drop table categories;
+drop table posts;
 
 drop table password_info;
 drop table user_login_info;
