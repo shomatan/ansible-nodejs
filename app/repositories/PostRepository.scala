@@ -62,7 +62,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   class Categories(tag: Tag) extends Table[DBCategory](tag, "categories") {
 
     def id = column[Long]("category_id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("name")
+    def name = column[String]("category")
 
     def * = (id, name) <> (DBCategory.tupled, DBCategory.unapply _)
   }

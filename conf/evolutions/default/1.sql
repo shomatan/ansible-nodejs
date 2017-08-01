@@ -39,7 +39,7 @@ create table posts (
 
 create table categories (
     category_id BIGSERIAL PRIMARY KEY
-  , name        VARCHAR   NOT NULL
+  , category    VARCHAR   NOT NULL
 );
 
 create table tags (
