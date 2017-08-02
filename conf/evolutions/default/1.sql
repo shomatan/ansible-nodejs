@@ -39,24 +39,24 @@ create table posts (
 
 create table categories (
     category_id BIGSERIAL PRIMARY KEY
-  , category    VARCHAR   NOT NULL
+  , category    VARCHAR   NOT NULL    UNIQUE
 );
 
 create table tags (
     tag_id  BIGSERIAL PRIMARY KEY
-  , tag     VARCHAR   NOT NULL
+  , tag     VARCHAR   NOT NULL    UNIQUE
 );
 
 CREATE TABLE post_category (
-    category_id   int REFERENCES categories (category_id)   ON UPDATE CASCADE
-  , post_id       int REFERENCES posts (post_id)            ON UPDATE CASCADE
-  , CONSTRAINT post_category_pkey PRIMARY KEY (category_id, post_id)  -- explicit pk
+    category_id   int REFERENCES categories (category_id)   ON UPDATE CASCADE ON DELETE CASCADE
+  , post_id       int REFERENCES posts (post_id)            ON UPDATE CASCADE ON DELETE CASCADE
+  , CONSTRAINT pk_post_category PRIMARY KEY (category_id, post_id)  -- explicit pk
 );
 
 CREATE TABLE post_tag (
-    tag_id        int REFERENCES tags (tag_id)              ON UPDATE CASCADE
-  , post_id       int REFERENCES posts (post_id)            ON UPDATE CASCADE
-  , CONSTRAINT post_tag_pkey PRIMARY KEY (tag_id, post_id)  -- explicit pk
+    tag_id        int REFERENCES tags (tag_id)              ON UPDATE CASCADE ON DELETE CASCADE
+  , post_id       int REFERENCES posts (post_id)            ON UPDATE CASCADE ON DELETE CASCADE
+  , CONSTRAINT pk_post_tag PRIMARY KEY (tag_id, post_id)  -- explicit pk
 );
 
 # --- !Downs

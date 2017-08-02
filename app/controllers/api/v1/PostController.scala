@@ -7,7 +7,7 @@ import me.shoma.play_cms.models.{Category, Post, Tag}
 import me.shoma.play_cms.repositories.PostRepository
 import me.shoma.play_cms.utils.authentication.DefaultEnv
 import play.api.mvc._
-import play.api.libs.json.Json
+import play.api.libs.json.{JsError, Json}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -17,9 +17,9 @@ class PostController @Inject()(
                                 val silhouette: Silhouette[DefaultEnv],
                                 postRepository: PostRepository)(implicit exec: ExecutionContext) extends AbstractController(cc) {
 
-  implicit val categoryWrites = Json.writes[Category]
-  implicit val tagWrites = Json.writes[Tag]
-  implicit val postWrites = Json.writes[Post]
+  implicit val categoryFormat = Json.format[Category]
+  implicit val tagFormat = Json.format[Tag]
+  implicit val postFormat = Json.format[Post]
 
   def list = Action.async {
 
@@ -29,8 +29,21 @@ class PostController @Inject()(
     }
   }
 
-  def post = silhouette.SecuredAction.async {
-    Future(Ok(""))
+  def post = Action.async(parse.json) { implicit request =>
+  //def post() = silhouette.SecuredAction.async {
+
+    request.body.validate[Post].map { data =>
+
+      val post = Post(data.id, data.title, data.content, data.categories, data.tags, data.createdAt, data.updatedAt)
+
+      postRepository.save(
+        post
+      ).map(_ => Ok(Json.obj("result" -> "success")))
+    }.recoverTotal { e =>
+      Future {
+        BadRequest(Json.obj("result" ->"failure", "error" -> JsError.toJson(e)))
+      }
+    }
   }
 
 }

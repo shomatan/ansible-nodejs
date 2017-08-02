@@ -14,6 +14,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   import profile.api._
 
   def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
+
     val offset = pageSize * page
 
     val action = (for {
@@ -36,6 +37,21 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
           )
       }
     }
+  }
+
+  def save(post: Post): Future[Post] = {
+
+    val dbPost = DBPost(post.id, post.title, post.content, post.createdAt.toInstant.getEpochSecond, post.updatedAt.toInstant.getEpochSecond)
+
+    // combine database actions to be run sequentially
+    val actions = (for {
+      _ <- slickPosts.insertOrUpdate(dbPost)
+      //_ <- slick.insertOrUpdate()
+//      loginInfo <- loginInfoAction
+//      _ <- slickUserLoginInfos += DBUserLoginInfo(dbUser.id, loginInfo.id.get)
+    } yield ()).transactionally
+    // run actions and return user afterwards
+    db.run(actions).map(_ => post)
   }
 
   case class DBPost(
