@@ -13,24 +13,24 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   import profile.api._
 
-  def list(page: Int = 0, pageSize: Int = 10): Future[Option[Post]] = {
+  def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
     val offset = pageSize * page
-    val postQuery = (for {
-      (postAndRelation, category) <- slickPosts joinLeft slickPostCategories on (_.id === _.postId) joinLeft slickCategories on (_._2.map(_.categoryId) === _.id)
-      (_, tag) <- slickPosts joinLeft slickPostTags on (_.id === _.postId) joinLeft slickTags on (_._2.map(_.tagId) === _.id)
-    } yield (postAndRelation._1, category, tag))
-      .sortBy(rows => rows._1.updatedAt.desc)
-      .drop(offset)
-      .take(pageSize)
-    db.run(postQuery.result.headOption).map { resultOption =>
-      resultOption.map {
-        case (post, category, tag) =>
+
+    val a = (for {
+      query <- slickPosts.drop(offset).take(pageSize).to[List].result
+      postCategory <- slickPostCategories joinLeft slickCategories on (_.categoryId === _.id) result
+    } yield (query, postCategory)).transactionally
+
+    db.run(a).map { resultOption =>
+      resultOption._1.map {
+        case (post) =>
           Post(
             post.id,
             post.title,
             post.content,
-            category.map{ c => Category(c.id, c.name) } toList,
-            tag.map{ t => me.shoma.play_cms.models.Tag(t.id, t.name) } toList,
+            resultOption._2.filter(_._1.postId == post.id).map { c => Category(c._2.get.id, c._2.get.name) },
+            Seq.empty[me.shoma.play_cms.models.Tag],
+            //tag.map{ t => me.shoma.play_cms.models.Tag(t.id, t.name) } toList,
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault())
           )
