@@ -12,7 +12,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) extends RepositorySlick {
 
   import profile.api._
-  
+
   def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
 
     val offset = pageSize * page
@@ -86,9 +86,30 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       // Assign intermediate tables - Tag
       _ <- DBIO.seq(actionTag.filter(_.nonEmpty).map { t => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = t.get.id) }: _*)
       _ <- DBIO.seq(dbTags.filter(_.id > 0).map { t => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = t.id) }: _*)
-    } yield (actionPost.getOrElse(dbPost).id)).transactionally
+    } yield (actionPost.getOrElse(dbPost).id, actionCategory, actionTag)).transactionally
     // run actions and return user afterwards
-    db.run(actions).map(_ => post)
+    db.run(actions).map {
+        case (postId, newCategories, newTags) => {
+          // update categories
+          val categories = post.categories.map {
+            case n if n.id > 0 => n
+            case n => {
+              val cat = newCategories.filter(_.nonEmpty).filter(_.get.name == n.name).head
+              n.copy(id = cat.get.id)
+            }
+          }
+          // update tags
+          val tags = post.tags.map {
+            case n if n.id > 0 => n
+            case n => {
+              val tag = newTags.filter(_.nonEmpty).filter(_.get.name == n.name).head
+              n.copy(id = tag.get.id)
+            }
+          }
+          // return updated new post
+          post.copy(id = postId, categories = categories, tags = tags)
+        }
+    }
   }
 
   def categoriesQuery(postId: Long) = slickPostCategories.filter(_.postId === postId).joinLeft(slickCategories).on(_.categoryId === _.id)
