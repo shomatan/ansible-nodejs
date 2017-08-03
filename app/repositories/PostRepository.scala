@@ -39,6 +39,29 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     }
   }
 
+  def find(id: Long): Future[Option[Post]] = {
+    val query = for {
+      dbPost <- slickPosts.filter(_.id === id)
+      dbCategories <- slickPostCategories.filter(_.postId === id).joinLeft(slickCategories).on(_.categoryId === _.id)
+      dbTags <- slickPostTags.filter(_.postId === id).joinLeft(slickTags).on(_.tagId === _.id)
+    } yield (dbPost, dbCategories, dbTags)
+
+    db.run(query.result.headOption).map { resultOption =>
+      resultOption.map {
+        case (post, categories, tags) =>
+          Post(
+            post.id,
+            post.title,
+            post.content,
+            categories._2.map { c => Category(c.id, c.name) } toSeq,
+            tags._2.map { t => me.shoma.play_cms.models.Tag(t.id, t.name) } toSeq,
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault())
+          )
+      }
+    }
+  }
+
   def save(post: Post): Future[Post] = {
 
     val dbPost = DBPost(post.id, post.title, post.content, post.createdAt.toInstant.getEpochSecond, post.updatedAt.toInstant.getEpochSecond)

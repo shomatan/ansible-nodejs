@@ -29,6 +29,13 @@ class PostController @Inject()(
     }
   }
 
+  def find(id: Long) = Action.async { implicit request =>
+    postRepository.find(id).map {
+      case Some(p) => Ok(Json.toJson(p))
+      case _ => NotFound(Json.obj("result" ->"failure", "error" -> "The requested ID does not exist."))
+    }
+  }
+
   def post = Action.async(parse.json) { implicit request =>
   //def post() = silhouette.SecuredAction.async {
 
