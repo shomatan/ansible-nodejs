@@ -36,9 +36,8 @@ class PostController @Inject()(
 
       val post = Post(data.id, data.title, data.content, data.categories, data.tags, data.createdAt, data.updatedAt)
 
-      postRepository.save(
-        post
-      ).map(_ => Ok(Json.obj("result" -> "success")))
+      postRepository.save(post).map { p =>
+        Ok(Json.obj("result" -> "success", "post" -> p)) }
     }.recoverTotal { e =>
       Future {
         BadRequest(Json.obj("result" ->"failure", "error" -> JsError.toJson(e)))

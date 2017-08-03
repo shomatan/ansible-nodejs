@@ -42,14 +42,28 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   def save(post: Post): Future[Post] = {
 
     val dbPost = DBPost(post.id, post.title, post.content, post.createdAt.toInstant.getEpochSecond, post.updatedAt.toInstant.getEpochSecond)
+    val dbCategories = post.categories.map { c => DBCategory(c.id, c.name) }
+    val dbTags = post.tags.map { t => DBTag(t.id, t.name) }
 
     // combine database actions to be run sequentially
     val actions = (for {
-      _ <- slickPosts.insertOrUpdate(dbPost)
-      //_ <- slick.insertOrUpdate()
-//      loginInfo <- loginInfoAction
-//      _ <- slickUserLoginInfos += DBUserLoginInfo(dbUser.id, loginInfo.id.get)
-    } yield ()).transactionally
+      actionPost <- slickPosts.returning(slickPosts).insertOrUpdate(dbPost)
+
+      actionCategory <- DBIO.sequence(dbCategories.map { c => slickCategories.returning(slickCategories).insertOrUpdate(c) })
+      actionTag <- DBIO.sequence(dbTags.map { t => slickTags.returning(slickTags).insertOrUpdate(t) })
+
+      // Delete intermediate tables
+      _ <- DBIO.seq(slickPostCategories.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
+      _ <- DBIO.seq(slickPostTags.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
+
+      // Assign intermediate tables - Category
+      _ <- DBIO.seq(actionCategory.filter(_.nonEmpty).map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.get.id) }: _*)
+      _ <- DBIO.seq(dbCategories.filter(_.id > 0).map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.id) }: _*)
+
+      // Assign intermediate tables - Tag
+      _ <- DBIO.seq(actionTag.filter(_.nonEmpty).map { t => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = t.get.id) }: _*)
+      _ <- DBIO.seq(dbTags.filter(_.id > 0).map { t => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = t.id) }: _*)
+    } yield (actionPost.getOrElse(dbPost).id)).transactionally
     // run actions and return user afterwards
     db.run(actions).map(_ => post)
   }
