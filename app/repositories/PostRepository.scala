@@ -12,15 +12,15 @@ import scala.concurrent.ExecutionContext.Implicits.global
 class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) extends RepositorySlick {
 
   import profile.api._
-
+  
   def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
 
     val offset = pageSize * page
 
     val action = (for {
       query <- slickPosts.drop(offset).take(pageSize).to[List].result
-      postCategory <- slickPostCategories.filter(_.postId.inSet(query.map(_.id))).joinLeft(slickCategories).on(_.categoryId === _.id).result
-      postTag <- slickPostTags.filter(_.postId.inSet(query.map(_.id))).joinLeft(slickTags).on(_.tagId === _.id).result
+      postCategory <- categoriesQuery(query.map(_.id)).result
+      postTag <- tagsQuery(query.map(_.id)).result
     } yield (query, postCategory, postTag)).transactionally
 
     db.run(action).map { resultOption =>
@@ -42,8 +42,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   def find(id: Long): Future[Option[Post]] = {
     val query = for {
       dbPost <- slickPosts.filter(_.id === id)
-      dbCategories <- slickPostCategories.filter(_.postId === id).joinLeft(slickCategories).on(_.categoryId === _.id)
-      dbTags <- slickPostTags.filter(_.postId === id).joinLeft(slickTags).on(_.tagId === _.id)
+      dbCategories <- categoriesQuery(id)
+      dbTags <- tagsQuery(id)
     } yield (dbPost, dbCategories, dbTags)
 
     db.run(query.result.headOption).map { resultOption =>
@@ -90,6 +90,14 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     // run actions and return user afterwards
     db.run(actions).map(_ => post)
   }
+
+  def categoriesQuery(postId: Long) = slickPostCategories.filter(_.postId === postId).joinLeft(slickCategories).on(_.categoryId === _.id)
+
+  def categoriesQuery(ids: Seq[Long]) = slickPostCategories.filter(_.postId.inSet(ids)).joinLeft(slickCategories).on(_.categoryId === _.id)
+
+  def tagsQuery(postId: Long) = slickPostTags.filter(_.postId === postId).joinLeft(slickTags).on(_.tagId === _.id)
+
+  def tagsQuery(ids: Seq[Long]) = slickPostTags.filter(_.postId.inSet(ids)).joinLeft(slickTags).on(_.tagId === _.id)
 
   case class DBPost(
                      id: Long,
