@@ -11,7 +11,7 @@ import play.api.db.slick.DatabaseConfigProvider
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) extends RepositorySlick {
+class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) extends DBTableDefinitions {
 
   import profile.api._
 
