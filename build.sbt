@@ -41,3 +41,5 @@ libraryDependencies ++= Seq(
 )
 
 unmanagedResourceDirectories in Test <+=  baseDirectory ( _ /"target/web/public/test" )
+
+javaOptions in Test += "-Dconfig.file=conf/application.test.conf"
