@@ -13,7 +13,7 @@ import play.api.db.slick.DatabaseConfigProvider
   * The DAO to store the password information.
   */
 class PasswordInfoRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProvider)
-  extends DelegableAuthInfoDAO[PasswordInfo] with RepositorySlick {
+  extends DelegableAuthInfoDAO[PasswordInfo] with DBTableDefinitions {
 
   import profile.api._
 

@@ -3,9 +3,10 @@ package me.shoma.play_cms.repositories
 import java.time.{Instant, ZoneId, ZonedDateTime}
 
 import com.mohiva.play.silhouette.api.LoginInfo
+import play.api.db.slick.HasDatabaseConfigProvider
 import slick.jdbc.JdbcProfile
 
-trait DBTableDefinitions {
+trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
 
   protected val driver: JdbcProfile
 
