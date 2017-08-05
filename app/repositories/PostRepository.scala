@@ -18,7 +18,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     val offset = pageSize * page
 
     val action = (for {
-      query <- slickPosts.sortBy(_.createdAt.desc).drop(offset).take(pageSize).to[List].result
+      query <- slickPosts.sortBy(_.id.desc).drop(offset).take(pageSize).to[List].result
       postCategory <- categoriesQuery(query.map(_.id)).result
       postTag <- tagsQuery(query.map(_.id)).result
     } yield (query, postCategory, postTag)).transactionally
@@ -64,7 +64,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   def save(post: Post): Future[Post] = {
 
-    val dbPost = DBPost(post.id, post.title, post.content, post.createdAt, post.updatedAt)
+    val dbPost = DBPost(post.id, post.title, post.content, post.createdAt.toInstant.getEpochSecond, post.updatedAt.toInstant.getEpochSecond)
     val dbCategories = post.categories.map { c => DBCategory(c.id, c.name) }
     val dbTags = post.tags.map { t => DBTag(t.id, t.name) }
 
