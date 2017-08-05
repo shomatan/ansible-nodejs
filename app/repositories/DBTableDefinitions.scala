@@ -10,7 +10,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
 
   protected val driver: JdbcProfile
 
-  import driver.api._
+  import profile.api._
 
   // --------------------------------------------------------------------------
   // User
