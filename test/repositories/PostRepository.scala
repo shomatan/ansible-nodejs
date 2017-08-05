@@ -41,10 +41,23 @@ class PostControllerSpec extends PlaySpec with BeforeAndAfterAll{
       savedPost.tags.length mustBe 0
     }
 
-    "get all rows" in new WithApplication() {
+    "insert a row with array tags and categories" in new WithApplication() {
+      val categories = Seq(Category(name = "cat - A"), Category(name = "cat - B"))
+      val tags = Seq(Tag(name = "tag - A"), Tag(name = "tag - B"))
+      val post = Post(title = "postID 2", content = "with categories and tags", categories = categories, tags = tags)
+      val savedPost = await(postRepo.save(post))
+
+      savedPost.id mustBe 2
+      savedPost.categories.length mustBe 2
+      savedPost.tags.length mustBe 2
+    }
+
+    "get all rows and satisfy the specifications" in new WithApplication() {
       val posts = await(postRepo.list())
 
-      posts.length mustBe 1
+      posts.length mustBe 2
+      // sorted
+      posts(0).id mustBe 2
     }
 
     //    "get single rows" in new  WithApplication()  {
