@@ -30,8 +30,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
             post.id,
             post.title,
             post.content,
-            resultOption._2.filter(_._1.postId == post.id).map(_._2).map { c => Category(c.get.id, c.get.name) },
-            resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.play_cms.models.Tag(t.get.id, t.get.name) },
+            resultOption._2.filter(_._1.postId == post.id).map(_._2).map { c => Category(Option(c.get.id), c.get.name) },
+            resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.play_cms.models.Tag(Option(t.get.id), t.get.name) },
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault())
           )
@@ -53,8 +53,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
             post.id,
             post.title,
             post.content,
-            categories._2.map { c => Category(c.id, c.name) } toSeq,
-            tags._2.map { t => me.shoma.play_cms.models.Tag(t.id, t.name) } toSeq,
+            categories._2.map { c => Category(Option(c.id), c.name) } toSeq,
+            tags._2.map { t => me.shoma.play_cms.models.Tag(Option(t.id), t.name) } toSeq,
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault())
           )
@@ -65,8 +65,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   def save(post: Post): Future[Post] = {
 
     val dbPost = DBPost(post.id, post.title, post.content, post.createdAt.toInstant.getEpochSecond, post.updatedAt.toInstant.getEpochSecond)
-    val dbCategories = post.categories.map { c => DBCategory(c.id, c.name) }
-    val dbTags = post.tags.map { t => DBTag(t.id, t.name) }
+    val dbCategories = post.categories.map { c => DBCategory(c.id.getOrElse(0), c.name) }
+    val dbTags = post.tags.map { t => DBTag(t.id.getOrElse(0), t.name) }
 
     // combine database actions to be run sequentially
     val actions = (for {
@@ -92,18 +92,18 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
         case (postId, newCategories, newTags) => {
           // update categories
           val categories = post.categories.map {
-            case n if n.id > 0 => n
+            case n if n.id.isEmpty => n
             case n => {
               val cat = newCategories.filter(_.nonEmpty).filter(_.get.name == n.name).head
-              n.copy(id = cat.get.id)
+              n.copy(id = Option(cat.get.id))
             }
           }
           // update tags
           val tags = post.tags.map {
-            case n if n.id > 0 => n
+            case n if n.id.isEmpty => n
             case n => {
               val tag = newTags.filter(_.nonEmpty).filter(_.get.name == n.name).head
-              n.copy(id = tag.get.id)
+              n.copy(id = Option(tag.get.id))
             }
           }
           // return updated new post
