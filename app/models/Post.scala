@@ -13,6 +13,6 @@ case class Post(
                )
 
 
-case class Category(id: Long = 0, name: String)
+case class Category(id: Option[Long] = None, name: String)
 
-case class Tag(id: Long = 0, name: String)
+case class Tag(id: Option[Long] = None, name: String)
