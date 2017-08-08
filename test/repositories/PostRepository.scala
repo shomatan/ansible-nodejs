@@ -14,7 +14,7 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.Await
 import scala.concurrent.Future
 
-class PostControllerSpec extends PlaySpec with BeforeAndAfterAll{
+class PostControllerSpec extends PlaySpec with BeforeAndAfterAll {
 
   lazy val appBuilder = new GuiceApplicationBuilder()
 
