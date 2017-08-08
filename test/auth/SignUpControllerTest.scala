@@ -1,6 +1,5 @@
 package auth
 
-import akka.stream.ActorMaterializer
 import me.shoma.play_cms.controllers.api.v1.auth.SignUpController
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.PlaySpec
@@ -8,14 +7,9 @@ import play.api.db.DBApi
 import play.api.db.evolutions.Evolutions
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.mvc.Results
-import org.scalatestplus.play._
-import play.api.http.Writeable
 import play.api.libs.json.Json
-import play.api.test.{FakeHeaders, FakeRequest, WithApplication}
+import play.api.test.{ FakeRequest, WithApplication}
 import play.api.test.Helpers._
-
-import scala.concurrent.duration.Duration
-import scala.concurrent.{Await, Future}
 
 class SignUpControllerTest extends PlaySpec with BeforeAndAfterAll with Results {
 
