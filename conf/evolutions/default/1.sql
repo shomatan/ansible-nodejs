@@ -60,7 +60,7 @@ CREATE TABLE post_tag (
 );
 
 INSERT INTO users VALUES ('c622137e-d45f-4542-bd46-934d3e8a0dd7', 'Admin', 'user', 'admin@example.com', 1502153234, 1502153234);
-INSERT INTO login_info VALUES (1, 'credentials', 'admin@example.com');
+INSERT INTO login_info (provider_id, provider_key) VALUES ('credentials', 'admin@example.com');
 INSERT INTO user_login_info VALUES ('c622137e-d45f-4542-bd46-934d3e8a0dd7', 1);
 INSERT INTO password_info VALUES ('bcrypt', '$2a$10$TgaGi7bBm9BGjVvq9H/pOucAUq6gVin.nrtDw5wz7Ux0NZyXzxieq', NULL, 1);
 
