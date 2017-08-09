@@ -66,8 +66,6 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   def save(post: Post): Future[Post] = {
 
     val dbPost = DBPost(post.id, post.title, post.content, post.createdAt.toInstant.getEpochSecond, post.updatedAt.toInstant.getEpochSecond)
-    val dbCategories = post.categories.map { c => DBCategory(c.id.getOrElse(0), c.name) }
-    val dbTags = post.tags.map { t => DBTag(t.id.getOrElse(0), t.name) }
 
     // combine database actions to be run sequentially
     val actions = (for {

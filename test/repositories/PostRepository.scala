@@ -30,15 +30,17 @@ class PostControllerSpec extends PlaySpec with BeforeAndAfterAll {
 
     def postRepo(implicit app: Application) = Application.instanceCache[PostRepository].apply(app)
 
-    "insert a row with empty tags and categories" in new WithApplication() {
-      val post = Post(title = "play-cms title", content = "play-cms content", categories = Seq.empty[Category], tags = Seq.empty[Tag])
+    "insert a row with 1 category and 1 tag" in new WithApplication() {
+      val categories = Seq(Category(name = "post1: category"))
+      val tags = Seq(Tag(name = "post1: tag"))
+      val post = Post(title = "play-cms title", content = "play-cms content", categories = categories, tags = tags)
       val savedPost = await(postRepo.save(post))
 
       savedPost.id mustBe 1
       savedPost.title mustBe "play-cms title"
       savedPost.content mustBe "play-cms content"
-      savedPost.categories.length mustBe 0
-      savedPost.tags.length mustBe 0
+      savedPost.categories.length mustBe 1
+      savedPost.tags.length mustBe 1
     }
 
     "insert a row with array tags and categories" in new WithApplication() {
@@ -50,6 +52,23 @@ class PostControllerSpec extends PlaySpec with BeforeAndAfterAll {
       savedPost.id mustBe 2
       savedPost.categories.length mustBe 2
       savedPost.tags.length mustBe 2
+    }
+
+    "edit a post" in new WithApplication() {
+      val p = await(postRepo.find(2)).get
+      val categories = Seq(Category(name = "cat - A"), Category(name = "cat - B"), Category(name = "cat - C"))
+      val tags = Seq(Tag(name = "tag - A"), Tag(name = "tag - B update"))
+
+      val post = p.copy(title = "updated title", content = "updated content", categories = categories, tags = tags)
+      val savedPost = await(postRepo.save(post))
+
+      savedPost.id mustBe 2
+      savedPost.title mustBe "updated title"
+      savedPost.content mustBe "updated content"
+      savedPost.categories.length mustBe 3
+      savedPost.tags.length mustBe 2
+      savedPost.tags.contains(Tag(name = "tag - B update")) mustBe true
+      savedPost.tags.contains(Tag(name = "tag - B")) mustBe false
     }
 
     "get all rows and satisfy the specifications" in new WithApplication() {
