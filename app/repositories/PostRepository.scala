@@ -75,27 +75,29 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
       // Find categories
       actionCategory <- DBIO.sequence(post.categories.map { current =>
-
         slickCategories.filter(_.name === current.name).result.headOption.flatMap {
           case Some(category) => DBIO.successful(category)
           case None => slickCategories.returning(slickCategories) += DBCategory(0, current.name)
         }
       })
 
-      //actionCategory <- DBIO.sequence(dbCategories.map { c => slickCategories.returning(slickCategories).insertOrUpdate(c) })
-      actionTag <- DBIO.sequence(dbTags.map { t => slickTags.returning(slickTags).insertOrUpdate(t) })
+      // Find tags
+      actionTag <- DBIO.sequence(post.tags.map { current =>
+        slickTags.filter(_.name === current.name).result.headOption.flatMap {
+          case Some(tag) => DBIO.successful(tag)
+          case None => slickTags.returning(slickTags) += DBTag(0, current.name)
+        }
+      })
 
       // Delete intermediate tables
       _ <- DBIO.seq(slickPostCategories.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
       _ <- DBIO.seq(slickPostTags.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
 
+      // Assign intermediate tables - Category
       _ <- DBIO.seq(actionCategory.map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.id)}: _*)
-      //_ <- DBIO.seq(actionCategory.filter(_.nonEmpty).map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.get.id) }: _*)
-      _ <- DBIO.seq(dbCategories.filter(_.id > 0).map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.id) }: _*)
 
       // Assign intermediate tables - Tag
-      _ <- DBIO.seq(actionTag.filter(_.nonEmpty).map { t => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = t.get.id) }: _*)
-      _ <- DBIO.seq(dbTags.filter(_.id > 0).map { t => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = t.id) }: _*)
+      _ <- DBIO.seq(actionTag.map { c => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = c.id)}: _*)
     } yield (actionPost.getOrElse(dbPost).id, actionCategory, actionTag)).transactionally
     // run actions and return user afterwards
     db.run(actions).map {
@@ -112,8 +114,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
           val tags = post.tags.map {
             case n if n.id.isEmpty => n
             case n => {
-              val tag = newTags.filter(_.nonEmpty).filter(_.get.name == n.name).head
-              n.copy(id = Option(tag.get.id))
+              val tag = newTags.filter(_.name == n.name).head
+              n.copy(id = Option(tag.id))
             }
           }
           // return updated new post
