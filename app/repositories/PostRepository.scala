@@ -5,6 +5,7 @@ import javax.inject.Inject
 
 import me.shoma.play_cms.models.{Category, Post}
 import play.api.db.slick.DatabaseConfigProvider
+import slick.dbio.DBIOAction
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -72,15 +73,24 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     val actions = (for {
       actionPost <- slickPosts.returning(slickPosts).insertOrUpdate(dbPost)
 
-      actionCategory <- DBIO.sequence(dbCategories.map { c => slickCategories.returning(slickCategories).insertOrUpdate(c) })
+      // Find categories
+      actionCategory <- DBIO.sequence(post.categories.map { current =>
+
+        slickCategories.filter(_.name === current.name).result.headOption.flatMap {
+          case Some(category) => DBIO.successful(category)
+          case None => slickCategories.returning(slickCategories) += DBCategory(0, current.name)
+        }
+      })
+
+      //actionCategory <- DBIO.sequence(dbCategories.map { c => slickCategories.returning(slickCategories).insertOrUpdate(c) })
       actionTag <- DBIO.sequence(dbTags.map { t => slickTags.returning(slickTags).insertOrUpdate(t) })
 
       // Delete intermediate tables
       _ <- DBIO.seq(slickPostCategories.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
       _ <- DBIO.seq(slickPostTags.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
 
-      // Assign intermediate tables - Category
-      _ <- DBIO.seq(actionCategory.filter(_.nonEmpty).map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.get.id) }: _*)
+      _ <- DBIO.seq(actionCategory.map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.id)}: _*)
+      //_ <- DBIO.seq(actionCategory.filter(_.nonEmpty).map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.get.id) }: _*)
       _ <- DBIO.seq(dbCategories.filter(_.id > 0).map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.id) }: _*)
 
       // Assign intermediate tables - Tag
@@ -94,8 +104,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
           val categories = post.categories.map {
             case n if n.id.isEmpty => n
             case n => {
-              val cat = newCategories.filter(_.nonEmpty).filter(_.get.name == n.name).head
-              n.copy(id = Option(cat.get.id))
+              val cat = newCategories.filter(_.name == n.name).head
+              n.copy(id = Option(cat.id))
             }
           }
           // update tags
