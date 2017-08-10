@@ -14,7 +14,7 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
 
   def list: Future[List[Category]] = {
 
-    val action = slickCategories.sortBy(_.id.desc).to[List].result
+    val action = slickCategories.sortBy(_.name.asc).to[List].result
 
     db.run(action).map { resultOption =>
       resultOption.map {
