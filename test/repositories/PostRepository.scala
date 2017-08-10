@@ -56,6 +56,10 @@ class PostControllerSpec extends PlaySpec with BeforeAndAfterAll {
 
     "edit a post" in new WithApplication() {
       val p = await(postRepo.find(2)).get
+
+      p.categories.length mustBe 2
+      p.tags.length mustBe 2
+
       val categories = Seq(Category(name = "cat - A"), Category(name = "cat - B"), Category(name = "cat - C"))
       val tags = Seq(Tag(name = "tag - A"), Tag(name = "tag - B update"))
 

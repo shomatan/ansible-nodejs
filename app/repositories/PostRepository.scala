@@ -40,26 +40,27 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   }
 
   def find(id: Long): Future[Option[Post]] = {
-    val query = for {
-      dbPost <- slickPosts.filter(_.id === id)
-      dbCategories <- categoriesQuery(id)
-      dbTags <- tagsQuery(id)
-    } yield (dbPost, dbCategories, dbTags)
+    val action = (for {
+      post <- slickPosts.filter(_.id === id).result.headOption
+      dbCategories <- categoriesQuery(id).to[List].result
+      dbTags <- tagsQuery(id).to[List].result
+    } yield (post, dbCategories, dbTags)).transactionally
 
-    db.run(query.result.headOption).map { resultOption =>
-      resultOption.map {
-        case (post, categories, tags) =>
-          Post(
+    db.run(action).map {
+        case (Some(post), categories, tags) => {
+          Some(Post(
             post.id,
             post.title,
             post.content,
-            categories._2.map { c => Category(Option(c.id), c.name) } toSeq,
-            tags._2.map { t => me.shoma.play_cms.models.Tag(Option(t.id), t.name) } toSeq,
+            categories.map { c => Category(Option(c._2.get.id), c._2.get.name) },
+            tags.map { t => me.shoma.play_cms.models.Tag(Option(t._2.get.id), t._2.get.name) },
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault())
-          )
-      }
+          ))
+        }
+        case _ => None
     }
+
   }
 
   def save(post: Post): Future[Post] = {
