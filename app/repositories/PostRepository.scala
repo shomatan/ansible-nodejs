@@ -5,7 +5,6 @@ import javax.inject.Inject
 
 import me.shoma.play_cms.models.{Category, Post}
 import play.api.db.slick.DatabaseConfigProvider
-import slick.dbio.DBIOAction
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -149,26 +148,6 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     def * = (id, title, content, createdAt, updatedAt) <> (DBPost.tupled, DBPost.unapply _)
   }
 
-  case class DBCategory(id: Long, name: String)
-
-  class Categories(tag: Tag) extends Table[DBCategory](tag, "categories") {
-
-    def id = column[Long]("category_id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("category")
-
-    def * = (id, name) <> (DBCategory.tupled, DBCategory.unapply _)
-  }
-
-  case class DBTag(id: Long, name: String)
-
-  class Tags(tag: Tag) extends Table[DBTag](tag, "tags") {
-
-    def id = column[Long]("tag_id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("tag")
-
-    def * = (id, name) <> (DBTag.tupled, DBTag.unapply _)
-  }
-
   case class DBPostTag(postId: Long, tagId: Long)
 
   class PostTag(tag: Tag) extends Table[DBPostTag](tag, "post_tag") {
@@ -193,8 +172,6 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   // Table query definitions
   // --------------------------------------------------------------------------
   val slickPosts = TableQuery[Posts]
-  val slickCategories = TableQuery[Categories]
-  val slickTags = TableQuery[Tags]
   val slickPostCategories = TableQuery[PostCategory]
   val slickPostTags = TableQuery[PostTag]
 }
