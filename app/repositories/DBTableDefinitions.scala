@@ -100,6 +100,19 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   }
 
   // --------------------------------------------------------------------------
+  // Tag
+  // --------------------------------------------------------------------------
+  case class DBTag(id: Long, name: String)
+
+  class Tags(tag: Tag) extends Table[DBTag](tag, "tags") {
+
+    def id = column[Long]("tag_id", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("tag")
+
+    def * = (id, name) <> (DBTag.tupled, DBTag.unapply _)
+  }
+
+  // --------------------------------------------------------------------------
   // Table query definitions
   // --------------------------------------------------------------------------
   val slickUsers = TableQuery[Users]
@@ -107,6 +120,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   val slickUserLoginInfos = TableQuery[UserLoginInfos]
   val slickPasswordInfos = TableQuery[PasswordInfos]
   val slickCategories = TableQuery[Categories]
+  val slickTags = TableQuery[Tags]
 
   // queries used in multiple places
   def loginInfoQuery(loginInfo: LoginInfo) =
