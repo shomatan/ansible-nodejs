@@ -87,12 +87,26 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   }
 
   // --------------------------------------------------------------------------
+  // Category
+  // --------------------------------------------------------------------------
+  case class DBCategory(id: Long, name: String)
+
+  class Categories(tag: Tag) extends Table[DBCategory](tag, "categories") {
+
+    def id = column[Long]("category_id", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("category")
+
+    def * = (id, name) <> (DBCategory.tupled, DBCategory.unapply _)
+  }
+
+  // --------------------------------------------------------------------------
   // Table query definitions
   // --------------------------------------------------------------------------
   val slickUsers = TableQuery[Users]
   val slickLoginInfos = TableQuery[LoginInfos]
   val slickUserLoginInfos = TableQuery[UserLoginInfos]
   val slickPasswordInfos = TableQuery[PasswordInfos]
+  val slickCategories = TableQuery[Categories]
 
   // queries used in multiple places
   def loginInfoQuery(loginInfo: LoginInfo) =

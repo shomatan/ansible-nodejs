@@ -5,7 +5,6 @@ import javax.inject.Inject
 import com.mohiva.play.silhouette.api.LoginInfo
 import me.shoma.play_cms.models.User
 import me.shoma.play_cms.repositories.UserRepository
-import me.shoma.play_cms.services.UserService
 
 import scala.concurrent.Future
 
