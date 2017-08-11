@@ -33,7 +33,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
             resultOption._2.filter(_._1.postId == post.id).map(_._2).map { c => Category(Option(c.get.id), c.get.name) },
             resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.play_cms.models.Tag(Option(t.get.id), t.get.name) },
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault())
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
           )
       }
     }
@@ -55,7 +56,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
             categories.map { c => Category(Option(c._2.get.id), c._2.get.name) },
             tags.map { t => me.shoma.play_cms.models.Tag(Option(t._2.get.id), t._2.get.name) },
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault())
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
           ))
         }
         case _ => None
@@ -65,7 +67,14 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   def save(post: Post): Future[Post] = {
 
-    val dbPost = DBPost(post.id, post.title, post.content, post.createdAt.toInstant.getEpochSecond, post.updatedAt.toInstant.getEpochSecond)
+    val dbPost = DBPost(
+      post.id,
+      post.title,
+      post.content,
+      post.createdAt.toInstant.getEpochSecond,
+      post.updatedAt.toInstant.getEpochSecond,
+      post.postedAt.toInstant.getEpochSecond
+    )
 
     // combine database actions to be run sequentially
     val actions = (for {
@@ -135,7 +144,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
                      title: String,
                      content: String,
                      createdAt: Long,
-                     updatedAt: Long
+                     updatedAt: Long,
+                     postedAt: Long
                    )
 
   class Posts(tag: Tag) extends Table[DBPost](tag, "posts") {
@@ -145,8 +155,9 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     def content = column[String]("content")
     def createdAt = column[Long]("created_at")
     def updatedAt = column[Long]("updated_at")
+    def postedAt = column[Long]("posted_at")
 
-    def * = (id, title, content, createdAt, updatedAt) <> (DBPost.tupled, DBPost.unapply _)
+    def * = (id, title, content, createdAt, updatedAt, postedAt) <> (DBPost.tupled, DBPost.unapply _)
   }
 
   case class DBPostTag(postId: Long, tagId: Long)

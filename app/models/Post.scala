@@ -10,6 +10,7 @@ case class Post(
                  tags: Seq[Tag],
                  createdAt: ZonedDateTime = ZonedDateTime.now(),
                  updatedAt: ZonedDateTime = ZonedDateTime.now(),
+                 postedAt: ZonedDateTime
                )
 
 
