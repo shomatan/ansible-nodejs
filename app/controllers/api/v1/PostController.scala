@@ -39,9 +39,7 @@ class PostController @Inject()(
   def post = Action.async(parse.json) { implicit request =>
   //def post() = silhouette.SecuredAction.async {
 
-    request.body.validate[Post].map { data =>
-
-      val post = Post(data.id, data.title, data.content, data.categories, data.tags, data.createdAt, data.updatedAt)
+    request.body.validate[Post].map { post =>
 
       postRepository.save(post).map { p =>
         Ok(Json.obj("result" -> "success", "post" -> p)) }

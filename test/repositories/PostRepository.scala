@@ -1,5 +1,7 @@
 package repositories
 
+import java.time.ZonedDateTime
+
 import me.shoma.play_cms.models.{Category, Post, Tag}
 import me.shoma.play_cms.repositories.PostRepository
 import org.scalatest.BeforeAndAfterAll
@@ -33,7 +35,7 @@ class PostControllerSpec extends PlaySpec with BeforeAndAfterAll {
     "insert a row with 1 category and 1 tag" in new WithApplication() {
       val categories = Seq(Category(name = "post1: category"))
       val tags = Seq(Tag(name = "post1: tag"))
-      val post = Post(title = "play-cms title", content = "play-cms content", categories = categories, tags = tags)
+      val post = Post(title = "play-cms title", content = "play-cms content", categories = categories, tags = tags, postedAt = ZonedDateTime.now())
       val savedPost = await(postRepo.save(post))
 
       savedPost.id mustBe 1
@@ -46,7 +48,7 @@ class PostControllerSpec extends PlaySpec with BeforeAndAfterAll {
     "insert a row with array tags and categories" in new WithApplication() {
       val categories = Seq(Category(name = "cat - A"), Category(name = "cat - B"))
       val tags = Seq(Tag(name = "tag - A"), Tag(name = "tag - B"))
-      val post = Post(title = "postID 2", content = "with categories and tags", categories = categories, tags = tags)
+      val post = Post(title = "postID 2", content = "with categories and tags", categories = categories, tags = tags, postedAt = ZonedDateTime.now())
       val savedPost = await(postRepo.save(post))
 
       savedPost.id mustBe 2
@@ -56,6 +58,10 @@ class PostControllerSpec extends PlaySpec with BeforeAndAfterAll {
 
     "edit a post" in new WithApplication() {
       val p = await(postRepo.find(2)).get
+
+      p.categories.length mustBe 2
+      p.tags.length mustBe 2
+
       val categories = Seq(Category(name = "cat - A"), Category(name = "cat - B"), Category(name = "cat - C"))
       val tags = Seq(Tag(name = "tag - A"), Tag(name = "tag - B update"))
 
