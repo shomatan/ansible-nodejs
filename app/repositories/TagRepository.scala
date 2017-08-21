@@ -21,7 +21,7 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
         case (tag) =>
           Tag(
             Some(tag.id),
-            tag.name,
+            tag.name
           )
       }
     }

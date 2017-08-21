@@ -21,7 +21,7 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
         case (category) =>
           Category(
             Some(category.id),
-            category.name,
+            category.name
           )
       }
     }
