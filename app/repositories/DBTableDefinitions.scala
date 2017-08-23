@@ -113,6 +113,21 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   }
 
   // --------------------------------------------------------------------------
+  // CustomField
+  // --------------------------------------------------------------------------
+  case class DBCustomField(postId: Long, key: String, value: String, customFieldType: Int)
+
+  class CustomFields(tag: Tag) extends Table[DBCustomField](tag, "post_custom_fields") {
+
+    def postId = column[Long]("post_id", O.PrimaryKey)
+    def key = column[String]("key_name", O.PrimaryKey)
+    def value = column[String]("value")
+    def valueType = column[Int]("value_type")
+
+    def * = (postId, key, value, valueType) <> (DBCustomField.tupled, DBCustomField.unapply _)
+  }
+
+  // --------------------------------------------------------------------------
   // Table query definitions
   // --------------------------------------------------------------------------
   val slickUsers = TableQuery[Users]
@@ -121,6 +136,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   val slickPasswordInfos = TableQuery[PasswordInfos]
   val slickCategories = TableQuery[Categories]
   val slickTags = TableQuery[Tags]
+  val slickCustomFields = TableQuery[CustomFields]
 
   // queries used in multiple places
   def loginInfoQuery(loginInfo: LoginInfo) =

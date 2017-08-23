@@ -64,6 +64,7 @@ CREATE TABLE post_custom_fields (
     post_id    BIGINT  REFERENCES posts (post_id)           ON UPDATE CASCADE ON DELETE CASCADE
   , key_name   VARCHAR NOT NULL
   , value      VARCHAR NOT NULL
+  , value_type INT     NOT NULL
   , PRIMARY KEY (post_id, key_name)
 );
 

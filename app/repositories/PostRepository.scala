@@ -3,7 +3,7 @@ package me.shoma.play_cms.repositories
 import java.time.{Instant, ZoneId, ZonedDateTime}
 import javax.inject.Inject
 
-import me.shoma.play_cms.models.{Category, Post}
+import me.shoma.play_cms.models._
 import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future
@@ -21,7 +21,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       query <- slickPosts.sortBy(_.id.desc).drop(offset).take(pageSize).to[List].result
       postCategory <- categoriesQuery(query.map(_.id)).result
       postTag <- tagsQuery(query.map(_.id)).result
-    } yield (query, postCategory, postTag)).transactionally
+      postCustomField <- customFieldQuery(query.map(_.id)).result
+    } yield (query, postCategory, postTag, postCustomField)).transactionally
 
     db.run(action).map { resultOption =>
       resultOption._1.map {
@@ -32,6 +33,16 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
             post.content,
             resultOption._2.filter(_._1.postId == post.id).map(_._2).map { c => Category(Option(c.get.id), c.get.name) },
             resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.play_cms.models.Tag(Option(t.get.id), t.get.name) },
+            resultOption._4.filter(_._1.postId == post.id).map(_._2).map { cf =>
+              CustomField(
+                post.id,
+                cf.get.key,
+                cf.get.customFieldType match {
+                  case StringCustomField.typeId => cf.get.value.toString
+                  case IntCustomField.typeId => cf.get.value.toInt
+                }
+              )
+            },
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
@@ -45,16 +56,27 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       post <- slickPosts.filter(_.id === id).result.headOption
       dbCategories <- categoriesQuery(id).to[List].result
       dbTags <- tagsQuery(id).to[List].result
-    } yield (post, dbCategories, dbTags)).transactionally
+      dbCustomFields <- slickCustomFields.filter(_.postId === id).to[Seq].result
+    } yield (post, dbCategories, dbTags, dbCustomFields)).transactionally
 
     db.run(action).map {
-        case (Some(post), categories, tags) => {
+        case (Some(post), categories, tags, customFields) => {
           Some(Post(
             post.id,
             post.title,
             post.content,
             categories.map { c => Category(Option(c._2.get.id), c._2.get.name) },
             tags.map { t => me.shoma.play_cms.models.Tag(Option(t._2.get.id), t._2.get.name) },
+            customFields.map { c =>
+              CustomField(
+                post.id,
+                c.key,
+                c.customFieldType match {
+                  case StringCustomField.typeId => c.value.toString
+                  case IntCustomField.typeId => c.value.toInt
+                }
+              )
+            },
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
@@ -62,7 +84,6 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
         }
         case _ => None
     }
-
   }
 
   def save(post: Post): Future[Post] = {
@@ -138,6 +159,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   def tagsQuery(postId: Long) = slickPostTags.filter(_.postId === postId).joinLeft(slickTags).on(_.tagId === _.id)
 
   def tagsQuery(ids: Seq[Long]) = slickPostTags.filter(_.postId.inSet(ids)).joinLeft(slickTags).on(_.tagId === _.id)
+
+  def customFieldQuery(ids: Seq[Long]) = slickCustomFields.filter(_.postId.inSet(ids)).joinLeft(slickCustomFields)
 
   case class DBPost(
                      id: Long,
