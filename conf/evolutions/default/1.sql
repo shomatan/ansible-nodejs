@@ -49,21 +49,21 @@ create table tags (
 );
 
 CREATE TABLE post_category (
-    category_id   int REFERENCES categories (category_id)   ON UPDATE CASCADE ON DELETE CASCADE
-  , post_id       int REFERENCES posts (post_id)            ON UPDATE CASCADE ON DELETE CASCADE
+    category_id  int    REFERENCES categories (category_id) ON UPDATE CASCADE ON DELETE CASCADE
+  , post_id      BIGINT REFERENCES posts (post_id)          ON UPDATE CASCADE ON DELETE CASCADE
   , CONSTRAINT pk_post_category PRIMARY KEY (category_id, post_id)  -- explicit pk
 );
 
 CREATE TABLE post_tag (
-    tag_id        int REFERENCES tags (tag_id)              ON UPDATE CASCADE ON DELETE CASCADE
-  , post_id       int REFERENCES posts (post_id)            ON UPDATE CASCADE ON DELETE CASCADE
+    tag_id        int    REFERENCES tags (tag_id)           ON UPDATE CASCADE ON DELETE CASCADE
+  , post_id       BIGINT REFERENCES posts (post_id)         ON UPDATE CASCADE ON DELETE CASCADE
   , CONSTRAINT pk_post_tag PRIMARY KEY (tag_id, post_id)  -- explicit pk
 );
 
 CREATE TABLE post_custom_fields (
-    post_id       int     REFERENCES posts (post_id)        ON UPDATE CASCADE ON DELETE CASCADE
-  , key_name      VARCHAR NOT NULL
-  , value         VARCHAR NOT NULL
+    post_id    BIGINT  REFERENCES posts (post_id)           ON UPDATE CASCADE ON DELETE CASCADE
+  , key_name   VARCHAR NOT NULL
+  , value      VARCHAR NOT NULL
   , PRIMARY KEY (post_id, key_name)
 );
 
