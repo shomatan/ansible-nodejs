@@ -60,13 +60,20 @@ CREATE TABLE post_tag (
   , CONSTRAINT pk_post_tag PRIMARY KEY (tag_id, post_id)  -- explicit pk
 );
 
-INSERT INTO users VALUES ('c622137e-d45f-4542-bd46-934d3e8a0dd7', 'Admin', 'user', 'admin@example.com', 1502153234, 1502153234);
-INSERT INTO login_info (provider_id, provider_key) VALUES ('credentials', 'admin@example.com');
+CREATE TABLE post_custom_fields (
+    post_id       int     REFERENCES posts (post_id)        ON UPDATE CASCADE ON DELETE CASCADE
+  , key_name      VARCHAR NOT NULL
+  , value         VARCHAR NOT NULL
+  , PRIMARY KEY (post_id, key_name)
+);
+
+INSERT INTO users VALUES ('c622137e-d45f-4542-bd46-934d3e8a0dd7', 'Admin', 'user', 'admin@admin.com', 1502153234, 1502153234);
+INSERT INTO login_info (provider_id, provider_key) VALUES ('credentials', 'admin@admin.com');
 INSERT INTO user_login_info VALUES ('c622137e-d45f-4542-bd46-934d3e8a0dd7', 1);
 INSERT INTO password_info VALUES ('bcrypt', '$2a$10$TgaGi7bBm9BGjVvq9H/pOucAUq6gVin.nrtDw5wz7Ux0NZyXzxieq', NULL, 1);
 
 # --- !Downs
-
+drop table post_custom_fields;
 drop table post_tag;
 drop table post_category;
 drop table tags;
