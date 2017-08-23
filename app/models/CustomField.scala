@@ -9,5 +9,5 @@ case class CustomField(postId: Long, key: String, value: Any)
 
 sealed abstract class CustomFieldType(val typeId: Int)
 
-case object StringCustomField extends CustomFieldType(0)
-case object IntCustomField extends CustomFieldType(1)
+case object StringCustomField extends CustomFieldType(1)
+case object IntCustomField extends CustomFieldType(2)
