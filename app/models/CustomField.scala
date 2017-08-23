@@ -11,3 +11,4 @@ sealed abstract class CustomFieldType(val typeId: Int)
 
 case object StringCustomField extends CustomFieldType(1)
 case object IntCustomField extends CustomFieldType(2)
+case object BigDecimalCustomField extends CustomFieldType(3)

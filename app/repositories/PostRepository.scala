@@ -74,6 +74,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
                 c.customFieldType match {
                   case StringCustomField.typeId => c.value.toString
                   case IntCustomField.typeId => c.value.toInt
+                  case BigDecimalCustomField.typeId => BigDecimal(c.value)
                 }
               )
             },
@@ -138,6 +139,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
             current.value.toString,
             current.value match {
               case _: Int => IntCustomField.typeId
+              case _: BigDecimal => BigDecimalCustomField.typeId
               case _: String => StringCustomField.typeId
             }
           )
