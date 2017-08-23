@@ -117,21 +117,6 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
         }
       })
 
-      // Find and insert custom fields
-      actionCustomField <- DBIO.sequence(post.customFields.map { current =>
-        slickCustomFields.filter(_.postId === actionPost.getOrElse(dbPost).id).filter(_.key === current.key).result.headOption.flatMap {
-          case Some(cf) => DBIO.successful(cf)
-          case None => slickCustomFields.returning(slickCustomFields) += DBCustomField(
-            actionPost.getOrElse(dbPost).id,
-            current.key,
-            current.value.toString,
-            current.value match {
-              case Int => IntCustomField.typeId
-            }
-          )
-        }
-      })
-
       // Delete intermediate tables
       _ <- DBIO.seq(slickPostCategories.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
       _ <- DBIO.seq(slickPostTags.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
@@ -143,6 +128,21 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       // Assign intermediate tables - Tag
       _ <- DBIO.seq(actionTag.map { c => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = c.id)}: _*)
 
+      // Find and insert custom fields
+      actionCustomField <- DBIO.sequence(post.customFields.map { current =>
+        slickCustomFields.filter(_.postId === actionPost.getOrElse(dbPost).id).filter(_.key === current.key).result.headOption.flatMap {
+          case Some(cf) => DBIO.successful(cf)
+          case None => slickCustomFields.returning(slickCustomFields) += DBCustomField(
+            actionPost.getOrElse(dbPost).id,
+            current.key,
+            current.value.toString,
+            current.value match {
+              case _: Int => IntCustomField.typeId
+              case _: String => StringCustomField.typeId
+            }
+          )
+        }
+      })
     } yield (actionPost.getOrElse(dbPost).id, actionCategory, actionTag, actionCustomField)).transactionally
     // run actions and return user afterwards
     db.run(actions).map {

@@ -41,9 +41,9 @@ class PostController @Inject()(
   }
 
   implicit val customFieldReads = (
-    (__ \ "id"   ).read[Long] and
-    (__ \ "key"  ).read[String] and
-    (__ \ "value").read[Any](Reads[Any](m => metaValueToJsValue(m)))
+    (__ \ "postId").read[Long] and
+    (__ \ "key"   ).read[String] and
+    (__ \ "value" ).read[Any](Reads[Any](m => metaValueToJsValue(m)))
   )(CustomField)
 
   implicit val categoryFormat = Json.format[Category]
