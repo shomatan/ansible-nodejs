@@ -8,6 +8,7 @@ case class Post(
                  content: String,
                  categories: Seq[Category],
                  tags: Seq[Tag],
+                 customFields: Seq[CustomField],
                  createdAt: ZonedDateTime = ZonedDateTime.now(),
                  updatedAt: ZonedDateTime = ZonedDateTime.now(),
                  postedAt: ZonedDateTime
