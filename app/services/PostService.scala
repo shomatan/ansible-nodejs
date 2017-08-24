@@ -8,7 +8,6 @@ import me.shoma.play_cms.repositories._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 
 import slick.jdbc.JdbcProfile
-import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -18,6 +17,8 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
                              categoryRepository: CategoryRepository,
                              tagRepository: TagRepository,
                              customFieldRepository: CustomFieldRepository) extends HasDatabaseConfigProvider[JdbcProfile] {
+
+  import profile.api._
 
   def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
 
