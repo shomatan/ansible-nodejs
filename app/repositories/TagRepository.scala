@@ -13,7 +13,7 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def list: Future[List[me.shoma.play_cms.models.Tag]] = {
 
-    val action = slickTags.sortBy(_.name.asc).to[List].result
+    val action = Tags.sortBy(_.name.asc).to[List].result
 
     db.run(action).map { resultOption =>
       resultOption.map {
@@ -28,26 +28,36 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   def findByPost(postId: Long) = {
     PostTags.filter(_.postId === postId)
-      .joinLeft(slickCategories).on(_.tagId === _.id)
+      .joinLeft(Tags).on(_.tagId === _.id)
       .to[List].result
   }
 
   def findByPost(postIds: Seq[Long]) = {
     PostTags.filter(_.postId.inSet(postIds))
-      .joinLeft(slickCategories)
+      .joinLeft(Tags)
       .on(_.tagId === _.id)
       .to[List].result
   }
 
   def insertOrUpdate(tags: Seq[me.shoma.play_cms.models.Tag]) = {
     DBIO.sequence(tags.map { current =>
-      slickTags.filter(_.name === current.name).result.headOption.flatMap {
+      Tags.filter(_.name === current.name).result.headOption.flatMap {
         case Some(tag) => DBIO.successful(tag)
-        case None => slickTags.returning(slickTags) += DBTag(0, current.name)
+        case None => Tags.returning(Tags) += DBTag(0, current.name)
       }
     })
   }
 
+  def sync(postId: Long, postTags: Seq[DBTag]) = {
+    for {
+      _ <- DBIO.seq(PostTags.filter(_.postId === postId).delete)
+      _ <- DBIO.seq(postTags.map { c => PostTags += DBPostTag(postId = postId, tagId = c.id)}: _*)
+    } yield ()
+  }
+
+  // --------------------------------------------------------------------------
+  // Post - Tag
+  // --------------------------------------------------------------------------
   case class DBPostTag(postId: Long, tagId: Long)
 
   class PostTag(tag: Tag) extends Table[DBPostTag](tag, "post_tag") {

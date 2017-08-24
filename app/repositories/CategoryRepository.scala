@@ -14,7 +14,7 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
 
   def list: Future[List[Category]] = {
 
-    val action = slickCategories.sortBy(_.name.asc).to[List].result
+    val action = Categories.sortBy(_.name.asc).to[List].result
 
     db.run(action).map { resultOption =>
       resultOption.map {
@@ -29,35 +29,30 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
 
   def findByPost(postId: Long) = {
     PostCategories.filter(_.postId === postId)
-      .joinLeft(slickCategories).on(_.categoryId === _.id)
+      .joinLeft(Categories).on(_.categoryId === _.id)
       .to[List].result
   }
 
   def findByPost(postIds: Seq[Long]) = {
     PostCategories.filter(_.postId.inSet(postIds))
-      .joinLeft(slickCategories)
+      .joinLeft(Categories)
       .on(_.categoryId === _.id)
       .to[List].result
   }
 
   def insertOrUpdate(categories: Seq[Category]) = {
     DBIO.sequence(categories.map { current =>
-      slickCategories.filter(_.name === current.name).result.headOption.flatMap {
+      Categories.filter(_.name === current.name).result.headOption.flatMap {
         case Some(category) => DBIO.successful(category)
-        case None => slickCategories.returning(slickCategories) += DBCategory(0, current.name)
+        case None => Categories.returning(Categories) += DBCategory(0, current.name)
       }
     })
   }
 
-  case class DBPostCategory(postId: Long, categoryId: Long)
-
-  class PostCategory(tag: Tag) extends Table[DBPostCategory](tag, "post_category") {
-
-    def postId = column[Long]("post_id")
-    def categoryId = column[Long]("category_id")
-
-    def * = (postId, categoryId) <> (DBPostCategory.tupled, DBPostCategory.unapply _)
+  def sync(postId: Long, postCategories: Seq[DBCategory]) = {
+    for {
+      _ <- DBIO.seq(PostCategories.filter(_.postId === postId).delete)
+      _ <- DBIO.seq(postCategories.map { c => PostCategories += DBPostCategory(postId = postId, categoryId = c.id)}: _*)
+    } yield ()
   }
-
-  val PostCategories = TableQuery[PostCategory]
 }

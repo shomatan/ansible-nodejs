@@ -100,6 +100,21 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   }
 
   // --------------------------------------------------------------------------
+  // Post - Category
+  // --------------------------------------------------------------------------
+  case class DBPostCategory(postId: Long, categoryId: Long)
+
+  class PostCategory(tag: Tag) extends Table[DBPostCategory](tag, "post_category") {
+
+    def postId = column[Long]("post_id")
+    def categoryId = column[Long]("category_id")
+
+    def * = (postId, categoryId) <> (DBPostCategory.tupled, DBPostCategory.unapply _)
+  }
+
+  val PostCategories = TableQuery[PostCategory]
+
+  // --------------------------------------------------------------------------
   // Tag
   // --------------------------------------------------------------------------
   case class DBTag(id: Long, name: String)
@@ -134,8 +149,8 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   val slickLoginInfos = TableQuery[LoginInfos]
   val slickUserLoginInfos = TableQuery[UserLoginInfos]
   val slickPasswordInfos = TableQuery[PasswordInfos]
-  val slickCategories = TableQuery[Categories]
-  val slickTags = TableQuery[Tags]
+  val Categories = TableQuery[Categories]
+  val Tags = TableQuery[Tags]
   val CustomFields = TableQuery[CustomFields]
 
   // queries used in multiple places

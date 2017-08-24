@@ -36,6 +36,9 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     Posts.returning(Posts).insertOrUpdate(dbPost)
   }
 
+  // --------------------------------------------------------------------------
+  // Post
+  // --------------------------------------------------------------------------
   case class DBPost(
                      id: Long,
                      title: String,
@@ -57,30 +60,5 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     def * = (id, title, content, createdAt, updatedAt, postedAt) <> (DBPost.tupled, DBPost.unapply _)
   }
 
-  case class DBPostTag(postId: Long, tagId: Long)
-
-  class PostTag(tag: Tag) extends Table[DBPostTag](tag, "post_tag") {
-
-    def postId = column[Long]("post_id")
-    def tagId = column[Long]("tag_id")
-
-    def * = (postId, tagId) <> (DBPostTag.tupled, DBPostTag.unapply _)
-  }
-
-  case class DBPostCategory(postId: Long, categoryId: Long)
-
-  class PostCategory(tag: Tag) extends Table[DBPostCategory](tag, "post_category") {
-
-    def postId = column[Long]("post_id")
-    def categoryId = column[Long]("category_id")
-
-    def * = (postId, categoryId) <> (DBPostCategory.tupled, DBPostCategory.unapply _)
-  }
-
-  // --------------------------------------------------------------------------
-  // Table query definitions
-  // --------------------------------------------------------------------------
   val Posts = TableQuery[Posts]
-  val PostCategories = TableQuery[PostCategory]
-  val slickPostTags = TableQuery[PostTag]
 }
