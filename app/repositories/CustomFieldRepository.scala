@@ -19,16 +19,16 @@ class CustomFieldRepository @Inject() (protected val dbConfigProvider: DatabaseC
     CustomFields.filter(_.postId.inSet(postIds)).to[List].result
   }
 
-  def sync(postId: Long, customFields: Seq[CustomField]) = {
+  def sync(post: DBPost, customFields: Seq[CustomField]) = {
 
     println(customFields)
     for {
-      _ <- DBIO.seq(CustomFields.filter(_.postId === postId).delete)
+      _ <- DBIO.seq(CustomFields.filter(_.postId === post.id).delete)
       _ <- DBIO.sequence(customFields.map { current =>
-        CustomFields.filter(_.postId === postId).filter(_.key === current.key).result.headOption.flatMap {
+        CustomFields.filter(_.postId === post.id).filter(_.key === current.key).result.headOption.flatMap {
           case Some(cf) => println("succes"); DBIO.successful(cf)
           case None => println(current.postId); CustomFields.returning(CustomFields) += DBCustomField(
-            postId,
+            post.id,
             current.key,
             current.value.toString,
             current.value match {

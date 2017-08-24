@@ -49,10 +49,10 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
     })
   }
 
-  def sync(postId: Long, postCategories: Seq[DBCategory]) = {
+  def sync(post: DBPost, postCategories: Seq[DBCategory]) = {
     for {
-      _ <- DBIO.seq(PostCategories.filter(_.postId === postId).delete)
-      _ <- DBIO.seq(postCategories.map { c => PostCategories += DBPostCategory(postId = postId, categoryId = c.id)}: _*)
+      _ <- DBIO.seq(PostCategories.filter(_.postId === post.id).delete)
+      _ <- DBIO.seq(postCategories.map { c => PostCategories += DBPostCategory(postId = post.id, categoryId = c.id)}: _*)
     } yield ()
   }
 

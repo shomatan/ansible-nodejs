@@ -96,6 +96,15 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
 
   def save(post: Post): Future[Post] = {
 
+    val dbPost = DBPost(
+      post.id,
+      post.title,
+      post.content,
+      post.createdAt.toInstant.getEpochSecond,
+      post.updatedAt.toInstant.getEpochSecond,
+      post.postedAt.toInstant.getEpochSecond
+    )
+
     val actions = (for {
       // Find Post
       actionPost <- postRepository.save(post)
@@ -104,11 +113,11 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
       // Find tags
       actionTag <- tagRepository.insertOrUpdate(post.tags)
       // Assign intermediate tables - Category
-      _ <- categoryRepository.sync(post.id, actionCategory)
+      _ <- categoryRepository.sync(actionPost.getOrElse(dbPost), actionCategory)
       // Assign intermediate tables - Tag
-      _ <- tagRepository.sync(post.id, actionTag)
+      _ <- tagRepository.sync(actionPost.getOrElse(dbPost), actionTag)
       // Assign custom fields
-      _ <- customFieldRepository.sync(post.id, post.customFields)
+      _ <- customFieldRepository.sync(actionPost.getOrElse(dbPost), post.customFields)
     } yield ()).transactionally
     // run actions and return user afterwards
     db.run(actions).map(_ => post)

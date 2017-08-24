@@ -48,10 +48,10 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     })
   }
 
-  def sync(postId: Long, postTags: Seq[DBTag]) = {
+  def sync(post: DBPost, postTags: Seq[DBTag]) = {
     for {
-      _ <- DBIO.seq(PostTags.filter(_.postId === postId).delete)
-      _ <- DBIO.seq(postTags.map { c => PostTags += DBPostTag(postId = postId, tagId = c.id)}: _*)
+      _ <- DBIO.seq(PostTags.filter(_.postId === post.id).delete)
+      _ <- DBIO.seq(postTags.map { c => PostTags += DBPostTag(postId = post.id, tagId = c.id)}: _*)
     } yield ()
   }
 

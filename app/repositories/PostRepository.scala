@@ -35,30 +35,4 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
     Posts.returning(Posts).insertOrUpdate(dbPost)
   }
-
-  // --------------------------------------------------------------------------
-  // Post
-  // --------------------------------------------------------------------------
-  case class DBPost(
-                     id: Long,
-                     title: String,
-                     content: String,
-                     createdAt: Long,
-                     updatedAt: Long,
-                     postedAt: Long
-                   )
-
-  class Posts(tag: Tag) extends Table[DBPost](tag, "posts") {
-
-    def id = column[Long]("post_id", O.PrimaryKey, O.AutoInc)
-    def title = column[String]("title")
-    def content = column[String]("content")
-    def createdAt = column[Long]("created_at")
-    def updatedAt = column[Long]("updated_at")
-    def postedAt = column[Long]("posted_at")
-
-    def * = (id, title, content, createdAt, updatedAt, postedAt) <> (DBPost.tupled, DBPost.unapply _)
-  }
-
-  val Posts = TableQuery[Posts]
 }

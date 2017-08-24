@@ -87,14 +87,39 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   }
 
   // --------------------------------------------------------------------------
+  // Post
+  // --------------------------------------------------------------------------
+  class Posts(tag: Tag) extends Table[DBPost](tag, "posts") {
+
+    def id = column[Long]("post_id", O.PrimaryKey, O.AutoInc)
+    def title = column[String]("title")
+    def content = column[String]("content")
+    def createdAt = column[Long]("created_at")
+    def updatedAt = column[Long]("updated_at")
+    def postedAt = column[Long]("posted_at")
+
+    def * = (id, title, content, createdAt, updatedAt, postedAt) <> (DBPost.tupled, DBPost.unapply _)
+  }
+
+  // --------------------------------------------------------------------------
   // Table query definitions
   // --------------------------------------------------------------------------
   val slickUsers = TableQuery[Users]
   val slickLoginInfos = TableQuery[LoginInfos]
   val slickUserLoginInfos = TableQuery[UserLoginInfos]
   val slickPasswordInfos = TableQuery[PasswordInfos]
+  val Posts = TableQuery[Posts]
 
   // queries used in multiple places
   def loginInfoQuery(loginInfo: LoginInfo) =
     slickLoginInfos.filter(dbLoginInfo => dbLoginInfo.providerID === loginInfo.providerID && dbLoginInfo.providerKey === loginInfo.providerKey)
 }
+
+case class DBPost(
+                   id: Long,
+                   title: String,
+                   content: String,
+                   createdAt: Long,
+                   updatedAt: Long,
+                   postedAt: Long
+                 )
