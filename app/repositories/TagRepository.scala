@@ -56,6 +56,19 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
   }
 
   // --------------------------------------------------------------------------
+  // Tag
+  // --------------------------------------------------------------------------
+  case class DBTag(id: Long, name: String)
+
+  class Tags(tag: Tag) extends Table[DBTag](tag, "tags") {
+
+    def id = column[Long]("tag_id", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("tag")
+
+    def * = (id, name) <> (DBTag.tupled, DBTag.unapply _)
+  }
+
+  // --------------------------------------------------------------------------
   // Post - Tag
   // --------------------------------------------------------------------------
   case class DBPostTag(postId: Long, tagId: Long)
@@ -68,5 +81,9 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
     def * = (postId, tagId) <> (DBPostTag.tupled, DBPostTag.unapply _)
   }
 
+  // --------------------------------------------------------------------------
+  // Table query definitions
+  // --------------------------------------------------------------------------
+  val Tags = TableQuery[Tags]
   val PostTags = TableQuery[PostTag]
 }

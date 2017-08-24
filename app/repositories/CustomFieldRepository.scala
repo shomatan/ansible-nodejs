@@ -12,20 +12,22 @@ class CustomFieldRepository @Inject() (protected val dbConfigProvider: DatabaseC
   import profile.api._
 
   def findByPost(postId: Long) = {
-    CustomFields.filter(_.postId === postId).joinLeft(CustomFields).to[List].result
+    CustomFields.filter(_.postId === postId).to[List].result
   }
 
   def findByPost(postIds: Seq[Long]) = {
-    CustomFields.filter(_.postId.inSet(postIds)).joinLeft(CustomFields).to[List].result
+    CustomFields.filter(_.postId.inSet(postIds)).to[List].result
   }
 
   def sync(postId: Long, customFields: Seq[CustomField]) = {
+
+    println(customFields)
     for {
       _ <- DBIO.seq(CustomFields.filter(_.postId === postId).delete)
       _ <- DBIO.sequence(customFields.map { current =>
         CustomFields.filter(_.postId === postId).filter(_.key === current.key).result.headOption.flatMap {
-          case Some(cf) => DBIO.successful(cf)
-          case None => CustomFields.returning(CustomFields) += DBCustomField(
+          case Some(cf) => println("succes"); DBIO.successful(cf)
+          case None => println(current.postId); CustomFields.returning(CustomFields) += DBCustomField(
             postId,
             current.key,
             current.value.toString,
@@ -39,4 +41,21 @@ class CustomFieldRepository @Inject() (protected val dbConfigProvider: DatabaseC
       })
     } yield ()
   }
+
+  // --------------------------------------------------------------------------
+  // Table query definitions
+  // --------------------------------------------------------------------------
+  case class DBCustomField(postId: Long, key: String, value: String, customFieldType: Int)
+
+  class CustomFields(tag: Tag) extends Table[DBCustomField](tag, "post_custom_fields") {
+
+    def postId = column[Long]("post_id", O.PrimaryKey)
+    def key = column[String]("key_name", O.PrimaryKey)
+    def value = column[String]("value")
+    def valueType = column[Int]("value_type")
+
+    def * = (postId, key, value, valueType) <> (DBCustomField.tupled, DBCustomField.unapply _)
+  }
+
+  val CustomFields = TableQuery[CustomFields]
 }

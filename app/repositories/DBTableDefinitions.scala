@@ -87,75 +87,14 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   }
 
   // --------------------------------------------------------------------------
-  // Category
-  // --------------------------------------------------------------------------
-  case class DBCategory(id: Long, name: String)
-
-  class Categories(tag: Tag) extends Table[DBCategory](tag, "categories") {
-
-    def id = column[Long]("category_id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("category")
-
-    def * = (id, name) <> (DBCategory.tupled, DBCategory.unapply _)
-  }
-
-  // --------------------------------------------------------------------------
-  // Post - Category
-  // --------------------------------------------------------------------------
-  case class DBPostCategory(postId: Long, categoryId: Long)
-
-  class PostCategory(tag: Tag) extends Table[DBPostCategory](tag, "post_category") {
-
-    def postId = column[Long]("post_id")
-    def categoryId = column[Long]("category_id")
-
-    def * = (postId, categoryId) <> (DBPostCategory.tupled, DBPostCategory.unapply _)
-  }
-
-  val PostCategories = TableQuery[PostCategory]
-
-  // --------------------------------------------------------------------------
-  // Tag
-  // --------------------------------------------------------------------------
-  case class DBTag(id: Long, name: String)
-
-  class Tags(tag: Tag) extends Table[DBTag](tag, "tags") {
-
-    def id = column[Long]("tag_id", O.PrimaryKey, O.AutoInc)
-    def name = column[String]("tag")
-
-    def * = (id, name) <> (DBTag.tupled, DBTag.unapply _)
-  }
-
-  // --------------------------------------------------------------------------
-  // CustomField
-  // --------------------------------------------------------------------------
-  case class DBCustomField(postId: Long, key: String, value: String, customFieldType: Int)
-
-  class CustomFields(tag: Tag) extends Table[DBCustomField](tag, "post_custom_fields") {
-
-    def postId = column[Long]("post_id", O.PrimaryKey)
-    def key = column[String]("key_name", O.PrimaryKey)
-    def value = column[String]("value")
-    def valueType = column[Int]("value_type")
-
-    def * = (postId, key, value, valueType) <> (DBCustomField.tupled, DBCustomField.unapply _)
-  }
-
-  // --------------------------------------------------------------------------
   // Table query definitions
   // --------------------------------------------------------------------------
   val slickUsers = TableQuery[Users]
   val slickLoginInfos = TableQuery[LoginInfos]
   val slickUserLoginInfos = TableQuery[UserLoginInfos]
   val slickPasswordInfos = TableQuery[PasswordInfos]
-  val Categories = TableQuery[Categories]
-  val Tags = TableQuery[Tags]
-  val CustomFields = TableQuery[CustomFields]
 
   // queries used in multiple places
   def loginInfoQuery(loginInfo: LoginInfo) =
     slickLoginInfos.filter(dbLoginInfo => dbLoginInfo.providerID === loginInfo.providerID && dbLoginInfo.providerKey === loginInfo.providerKey)
-
-
 }

@@ -55,4 +55,36 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
       _ <- DBIO.seq(postCategories.map { c => PostCategories += DBPostCategory(postId = postId, categoryId = c.id)}: _*)
     } yield ()
   }
+
+  // --------------------------------------------------------------------------
+  // Category
+  // --------------------------------------------------------------------------
+  case class DBCategory(id: Long, name: String)
+
+  class Categories(tag: Tag) extends Table[DBCategory](tag, "categories") {
+
+    def id = column[Long]("category_id", O.PrimaryKey, O.AutoInc)
+    def name = column[String]("category")
+
+    def * = (id, name) <> (DBCategory.tupled, DBCategory.unapply _)
+  }
+
+  // --------------------------------------------------------------------------
+  // Post - Category
+  // --------------------------------------------------------------------------
+  case class DBPostCategory(postId: Long, categoryId: Long)
+
+  class PostCategory(tag: Tag) extends Table[DBPostCategory](tag, "post_category") {
+
+    def postId = column[Long]("post_id")
+    def categoryId = column[Long]("category_id")
+
+    def * = (postId, categoryId) <> (DBPostCategory.tupled, DBPostCategory.unapply _)
+  }
+
+  // --------------------------------------------------------------------------
+  // Table query definitions
+  // --------------------------------------------------------------------------
+  val Categories = TableQuery[Categories]
+  val PostCategories = TableQuery[PostCategory]
 }

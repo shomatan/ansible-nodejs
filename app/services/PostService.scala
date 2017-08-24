@@ -5,17 +5,19 @@ import javax.inject.Inject
 
 import me.shoma.play_cms.models._
 import me.shoma.play_cms.repositories._
+import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
+
+import slick.jdbc.JdbcProfile
 import slick.jdbc.PostgresProfile.api._
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
-class PostService @Inject() (postRepository: PostRepository,
+class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
+                            (postRepository: PostRepository,
                              categoryRepository: CategoryRepository,
                              tagRepository: TagRepository,
-                             customFieldRepository: CustomFieldRepository) {
-
-  val db = Database.forConfig("slick.dbs.default")
+                             customFieldRepository: CustomFieldRepository) extends HasDatabaseConfigProvider[JdbcProfile] {
 
   def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
 
@@ -35,13 +37,13 @@ class PostService @Inject() (postRepository: PostRepository,
             post.content,
             resultOption._2.filter(_._1.postId == post.id).map(_._2).map { c => Category(Option(c.get.id), c.get.name) },
             resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.play_cms.models.Tag(Option(t.get.id), t.get.name) },
-            resultOption._4.filter(_._1.postId == post.id).map(_._2).map { cf =>
+            resultOption._4.filter(_.postId == post.id).map { cf =>
               CustomField(
                 post.id,
-                cf.get.key,
-                cf.get.customFieldType match {
-                  case StringCustomField.typeId => cf.get.value.toString
-                  case IntCustomField.typeId => cf.get.value.toInt
+                cf.key,
+                cf.customFieldType match {
+                  case StringCustomField.typeId => cf.value.toString
+                  case IntCustomField.typeId => cf.value.toInt
                 }
               )
             },
@@ -64,6 +66,7 @@ class PostService @Inject() (postRepository: PostRepository,
 
     db.run(action).map {
       case (Some(post), categories, tags, customFields) => {
+
         Some(Post(
           post.id,
           post.title,
@@ -71,14 +74,13 @@ class PostService @Inject() (postRepository: PostRepository,
           categories.map { c => Category(Option(c._2.get.id), c._2.get.name) },
           tags.map { t => me.shoma.play_cms.models.Tag(Option(t._2.get.id), t._2.get.name) },
           customFields.map { c =>
-            val cf = c._1
             CustomField(
               post.id,
-              cf.key,
-              cf.customFieldType match {
-                case StringCustomField.typeId => cf.value.toString
-                case IntCustomField.typeId => cf.value.toInt
-                case BigDecimalCustomField.typeId => BigDecimal(cf.value)
+              c.key,
+              c.customFieldType match {
+                case StringCustomField.typeId => c.value.toString
+                case IntCustomField.typeId => c.value.toInt
+                case BigDecimalCustomField.typeId => BigDecimal(c.value)
               }
             )
           },
