@@ -13,42 +13,9 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   import profile.api._
 
-  def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
-
+  def list(page: Int = 0, pageSize: Int = 10) = {
     val offset = pageSize * page
-
-    val action = (for {
-      query <- Posts.sortBy(_.id.desc).drop(offset).take(pageSize).to[List].result
-      postCategory <- categoriesQuery(query.map(_.id)).result
-      postTag <- tagsQuery(query.map(_.id)).result
-      postCustomField <- customFieldQuery(query.map(_.id)).result
-    } yield (query, postCategory, postTag, postCustomField)).transactionally
-
-    db.run(action).map { resultOption =>
-      resultOption._1.map {
-        case (post) =>
-          Post(
-            post.id,
-            post.title,
-            post.content,
-            resultOption._2.filter(_._1.postId == post.id).map(_._2).map { c => Category(Option(c.get.id), c.get.name) },
-            resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.play_cms.models.Tag(Option(t.get.id), t.get.name) },
-            resultOption._4.filter(_._1.postId == post.id).map(_._2).map { cf =>
-              CustomField(
-                post.id,
-                cf.get.key,
-                cf.get.customFieldType match {
-                  case StringCustomField.typeId => cf.get.value.toString
-                  case IntCustomField.typeId => cf.get.value.toInt
-                }
-              )
-            },
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
-          )
-      }
-    }
+    Posts.sortBy(_.id.desc).drop(offset).take(pageSize).to[List].result
   }
 
   def find(id: Long) = {
@@ -142,14 +109,6 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
         }
     }
   }
-
-  def categoriesQuery(postId: Long) = PostCategories.filter(_.postId === postId).joinLeft(slickCategories).on(_.categoryId === _.id)
-
-  def categoriesQuery(ids: Seq[Long]) = PostCategories.filter(_.postId.inSet(ids)).joinLeft(slickCategories).on(_.categoryId === _.id)
-
-  def tagsQuery(postId: Long) = slickPostTags.filter(_.postId === postId).joinLeft(slickTags).on(_.tagId === _.id)
-
-  def tagsQuery(ids: Seq[Long]) = slickPostTags.filter(_.postId.inSet(ids)).joinLeft(slickTags).on(_.tagId === _.id)
 
   def customFieldQuery(ids: Seq[Long]) = CustomFields.filter(_.postId.inSet(ids)).joinLeft(CustomFields)
 

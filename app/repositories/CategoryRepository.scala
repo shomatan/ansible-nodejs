@@ -33,6 +33,13 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
       .to[List].result
   }
 
+  def findByPost(postIds: Seq[Long]) = {
+    PostCategories.filter(_.postId.inSet(postIds))
+      .joinLeft(slickCategories)
+      .on(_.categoryId === _.id)
+      .to[List].result
+  }
+
   case class DBPostCategory(postId: Long, categoryId: Long)
 
   class PostCategory(tag: Tag) extends Table[DBPostCategory](tag, "post_category") {

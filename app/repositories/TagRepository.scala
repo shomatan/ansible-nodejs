@@ -32,6 +32,13 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       .to[List].result
   }
 
+  def findByPost(postIds: Seq[Long]) = {
+    PostTags.filter(_.postId.inSet(postIds))
+      .joinLeft(slickCategories)
+      .on(_.tagId === _.id)
+      .to[List].result
+  }
+
   case class DBPostTag(postId: Long, tagId: Long)
 
   class PostTag(tag: Tag) extends Table[DBPostTag](tag, "post_tag") {

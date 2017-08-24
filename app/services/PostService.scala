@@ -18,6 +18,42 @@ class PostService @Inject() (postRepository: PostRepository,
 
   val db = Database.forConfig("db.Default")
 
+  def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
+
+    val action = (for {
+      query <- postRepository.list(page, pageSize)
+      categories <- categoryRepository.findByPost(query.map(_.id))
+      postTag <- tagRepository.findByPost(query.map(_.id))
+      postCustomField <- customFieldRepository.findByPost(query.map(_.id))
+    } yield (query, categories, postTag, postCustomField)).transactionally
+
+    db.run(action).map { resultOption =>
+      resultOption._1.map {
+        case (post) =>
+          Post(
+            post.id,
+            post.title,
+            post.content,
+            resultOption._2.filter(_._1.postId == post.id).map(_._2).map { c => Category(Option(c.get.id), c.get.name) },
+            resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.play_cms.models.Tag(Option(t.get.id), t.get.name) },
+            resultOption._4.filter(_._1.postId == post.id).map(_._2).map { cf =>
+              CustomField(
+                post.id,
+                cf.get.key,
+                cf.get.customFieldType match {
+                  case StringCustomField.typeId => cf.get.value.toString
+                  case IntCustomField.typeId => cf.get.value.toInt
+                }
+              )
+            },
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
+          )
+      }
+    }
+  }
+
   def find(id: Long): Future[Option[Post]] = {
 
     val action = (for {

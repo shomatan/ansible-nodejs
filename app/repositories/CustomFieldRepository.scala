@@ -12,7 +12,7 @@ class CustomFieldRepository @Inject() (protected val dbConfigProvider: DatabaseC
     CustomFields.filter(_.postId === postId).joinLeft(CustomFields).to[List].result
   }
 
-  def findByPosts(postIds: Seq[Long]) = {
+  def findByPost(postIds: Seq[Long]) = {
     CustomFields.filter(_.postId.inSet(postIds)).joinLeft(CustomFields).to[List].result
   }
 }
