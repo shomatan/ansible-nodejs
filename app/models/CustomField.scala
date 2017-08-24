@@ -2,7 +2,7 @@ package me.shoma.play_cms.models
 
 // sealed trait CustomField
 
-case class CustomField(postId: Long, key: String, value: Any)
+case class CustomField(postId: Long = 0, key: String, value: Any)
 
 //final case class CustomFieldString(postId: Long, key: String, value: String)
 //final case class CustomFieldInt(postId: Long, key: String, value: Int)

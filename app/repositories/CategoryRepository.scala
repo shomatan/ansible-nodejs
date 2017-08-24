@@ -26,4 +26,22 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
       }
     }
   }
+
+  def findByPost(postId: Long) = {
+    PostCategories.filter(_.postId === postId)
+      .joinLeft(slickCategories).on(_.categoryId === _.id)
+      .to[List].result
+  }
+
+  case class DBPostCategory(postId: Long, categoryId: Long)
+
+  class PostCategory(tag: Tag) extends Table[DBPostCategory](tag, "post_category") {
+
+    def postId = column[Long]("post_id")
+    def categoryId = column[Long]("category_id")
+
+    def * = (postId, categoryId) <> (DBPostCategory.tupled, DBPostCategory.unapply _)
+  }
+
+  val PostCategories = TableQuery[PostCategory]
 }

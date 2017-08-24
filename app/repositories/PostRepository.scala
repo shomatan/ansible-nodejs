@@ -18,7 +18,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     val offset = pageSize * page
 
     val action = (for {
-      query <- slickPosts.sortBy(_.id.desc).drop(offset).take(pageSize).to[List].result
+      query <- Posts.sortBy(_.id.desc).drop(offset).take(pageSize).to[List].result
       postCategory <- categoriesQuery(query.map(_.id)).result
       postTag <- tagsQuery(query.map(_.id)).result
       postCustomField <- customFieldQuery(query.map(_.id)).result
@@ -51,40 +51,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     }
   }
 
-  def find(id: Long): Future[Option[Post]] = {
-    val action = (for {
-      post <- slickPosts.filter(_.id === id).result.headOption
-      dbCategories <- categoriesQuery(id).to[List].result
-      dbTags <- tagsQuery(id).to[List].result
-      dbCustomFields <- slickCustomFields.filter(_.postId === id).to[Seq].result
-    } yield (post, dbCategories, dbTags, dbCustomFields)).transactionally
-
-    db.run(action).map {
-        case (Some(post), categories, tags, customFields) => {
-          Some(Post(
-            post.id,
-            post.title,
-            post.content,
-            categories.map { c => Category(Option(c._2.get.id), c._2.get.name) },
-            tags.map { t => me.shoma.play_cms.models.Tag(Option(t._2.get.id), t._2.get.name) },
-            customFields.map { c =>
-              CustomField(
-                post.id,
-                c.key,
-                c.customFieldType match {
-                  case StringCustomField.typeId => c.value.toString
-                  case IntCustomField.typeId => c.value.toInt
-                  case BigDecimalCustomField.typeId => BigDecimal(c.value)
-                }
-              )
-            },
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
-          ))
-        }
-        case _ => None
-    }
+  def find(id: Long) = {
+    Posts.filter(_.id === id).result.headOption
   }
 
   def save(post: Post): Future[Post] = {
@@ -100,7 +68,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
     // combine database actions to be run sequentially
     val actions = (for {
-      actionPost <- slickPosts.returning(slickPosts).insertOrUpdate(dbPost)
+      actionPost <- Posts.returning(Posts).insertOrUpdate(dbPost)
 
       // Find categories
       actionCategory <- DBIO.sequence(post.categories.map { current =>
@@ -119,21 +87,21 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       })
 
       // Delete intermediate tables
-      _ <- DBIO.seq(slickPostCategories.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
+      _ <- DBIO.seq(PostCategories.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
       _ <- DBIO.seq(slickPostTags.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
-      _ <- DBIO.seq(slickCustomFields.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
+      _ <- DBIO.seq(CustomFields.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
 
       // Assign intermediate tables - Category
-      _ <- DBIO.seq(actionCategory.map { c => slickPostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.id)}: _*)
+      _ <- DBIO.seq(actionCategory.map { c => PostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.id)}: _*)
 
       // Assign intermediate tables - Tag
       _ <- DBIO.seq(actionTag.map { c => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = c.id)}: _*)
 
       // Find and insert custom fields
       actionCustomField <- DBIO.sequence(post.customFields.map { current =>
-        slickCustomFields.filter(_.postId === actionPost.getOrElse(dbPost).id).filter(_.key === current.key).result.headOption.flatMap {
+        CustomFields.filter(_.postId === actionPost.getOrElse(dbPost).id).filter(_.key === current.key).result.headOption.flatMap {
           case Some(cf) => DBIO.successful(cf)
-          case None => slickCustomFields.returning(slickCustomFields) += DBCustomField(
+          case None => CustomFields.returning(CustomFields) += DBCustomField(
             actionPost.getOrElse(dbPost).id,
             current.key,
             current.value.toString,
@@ -175,15 +143,15 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     }
   }
 
-  def categoriesQuery(postId: Long) = slickPostCategories.filter(_.postId === postId).joinLeft(slickCategories).on(_.categoryId === _.id)
+  def categoriesQuery(postId: Long) = PostCategories.filter(_.postId === postId).joinLeft(slickCategories).on(_.categoryId === _.id)
 
-  def categoriesQuery(ids: Seq[Long]) = slickPostCategories.filter(_.postId.inSet(ids)).joinLeft(slickCategories).on(_.categoryId === _.id)
+  def categoriesQuery(ids: Seq[Long]) = PostCategories.filter(_.postId.inSet(ids)).joinLeft(slickCategories).on(_.categoryId === _.id)
 
   def tagsQuery(postId: Long) = slickPostTags.filter(_.postId === postId).joinLeft(slickTags).on(_.tagId === _.id)
 
   def tagsQuery(ids: Seq[Long]) = slickPostTags.filter(_.postId.inSet(ids)).joinLeft(slickTags).on(_.tagId === _.id)
 
-  def customFieldQuery(ids: Seq[Long]) = slickCustomFields.filter(_.postId.inSet(ids)).joinLeft(slickCustomFields)
+  def customFieldQuery(ids: Seq[Long]) = CustomFields.filter(_.postId.inSet(ids)).joinLeft(CustomFields)
 
   case class DBPost(
                      id: Long,
@@ -229,7 +197,7 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
   // --------------------------------------------------------------------------
   // Table query definitions
   // --------------------------------------------------------------------------
-  val slickPosts = TableQuery[Posts]
-  val slickPostCategories = TableQuery[PostCategory]
+  val Posts = TableQuery[Posts]
+  val PostCategories = TableQuery[PostCategory]
   val slickPostTags = TableQuery[PostTag]
 }

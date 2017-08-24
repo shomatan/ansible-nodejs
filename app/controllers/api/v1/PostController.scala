@@ -12,6 +12,7 @@ import play.api.mvc._
 import play.api.libs.json.{JsError, Json}
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
+import services.PostService
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -19,7 +20,8 @@ import scala.concurrent.{ExecutionContext, Future}
 class PostController @Inject()(
                                 cc: ControllerComponents,
                                 val silhouette: Silhouette[DefaultEnv],
-                                postRepository: PostRepository)(implicit exec: ExecutionContext) extends AbstractController(cc) {
+                                postRepository: PostRepository,
+                                postService: PostService)(implicit exec: ExecutionContext) extends AbstractController(cc) {
 
   implicit val zonedDateTimeWrites = new Writes[ZonedDateTime] {
     def writes(d: ZonedDateTime): JsValue = JsString(d.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")))
@@ -58,7 +60,7 @@ class PostController @Inject()(
   }
 
   def find(id: Long) = Action.async { implicit request =>
-    postRepository.find(id).map {
+    postService.find(id).map {
       case Some(p) => Ok(Json.toJson(p))
       case _ => NotFound(Json.obj("result" ->"failure", "error" -> "The requested ID does not exist."))
     }

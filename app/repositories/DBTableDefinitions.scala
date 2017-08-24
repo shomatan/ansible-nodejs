@@ -136,7 +136,7 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
   val slickPasswordInfos = TableQuery[PasswordInfos]
   val slickCategories = TableQuery[Categories]
   val slickTags = TableQuery[Tags]
-  val slickCustomFields = TableQuery[CustomFields]
+  val CustomFields = TableQuery[CustomFields]
 
   // queries used in multiple places
   def loginInfoQuery(loginInfo: LoginInfo) =
