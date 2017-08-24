@@ -53,7 +53,7 @@ class PostController @Inject()(
   implicit val postFormat = Json.format[Post]
 
   def list = Action.async {
-    postRepository.list().map { case (posts) =>
+    postService.list().map { case (posts) =>
       val json = Json.toJson(posts)
       Ok(json)
     }
@@ -71,7 +71,7 @@ class PostController @Inject()(
 
     request.body.validate[Post].map { post =>
 
-      postRepository.save(post).map { p =>
+      postService.save(post).map { p =>
         Ok(Json.obj("result" -> "success", "post" -> p)) }
     }.recoverTotal { e =>
       Future {

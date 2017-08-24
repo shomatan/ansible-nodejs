@@ -91,4 +91,72 @@ class PostService @Inject() (postRepository: PostRepository,
       case _ => None
     }
   }
+
+  def save(post: Post): Future[Post] = {
+
+    val actions = (for {
+      actionPost <- postRepository.save(post)
+
+      // Find categories
+      actionCategory <- categoryRepository.insertOrUpdate(post.categories)
+
+      // Find tags
+      actionTag <- tagRepository.insertOrUpdate(post.tags)
+
+      // Delete intermediate tables
+      _ <-
+      _ <- DBIO.seq(slickPostTags.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
+      _ <- DBIO.seq(CustomFields.filter(_.postId === actionPost.getOrElse(dbPost).id).delete)
+
+      // Assign intermediate tables - Category
+      _ <- DBIO.seq(actionCategory.map { c => PostCategories += DBPostCategory(postId = actionPost.getOrElse(dbPost).id, categoryId = c.id)}: _*)
+
+      // Assign intermediate tables - Tag
+      _ <- DBIO.seq(actionTag.map { c => slickPostTags += DBPostTag(postId = actionPost.getOrElse(dbPost).id, tagId = c.id)}: _*)
+
+      // Find and insert custom fields
+      actionCustomField <- DBIO.sequence(post.customFields.map { current =>
+        CustomFields.filter(_.postId === actionPost.getOrElse(dbPost).id).filter(_.key === current.key).result.headOption.flatMap {
+          case Some(cf) => DBIO.successful(cf)
+          case None => CustomFields.returning(CustomFields) += DBCustomField(
+            actionPost.getOrElse(dbPost).id,
+            current.key,
+            current.value.toString,
+            current.value match {
+              case _: Int => IntCustomField.typeId
+              case _: BigDecimal => BigDecimalCustomField.typeId
+              case _: String => StringCustomField.typeId
+            }
+          )
+        }
+      })
+    } yield (actionPost.getOrElse(dbPost).id, actionCategory, actionTag, actionCustomField)).transactionally
+    // run actions and return user afterwards
+    db.run(actions).map {
+      case (postId, newCategories, newTags, newCustomFields) => {
+        // update categories
+        val categories = post.categories.map {
+          case n if n.id.isEmpty => n
+          case n => {
+            val cat = newCategories.filter(_.name == n.name).head
+            n.copy(id = Option(cat.id))
+          }
+        }
+        // update tags
+        val tags = post.tags.map {
+          case n if n.id.isEmpty => n
+          case n => {
+            val tag = newTags.filter(_.name == n.name).head
+            n.copy(id = Option(tag.id))
+          }
+        }
+        // update custom fields
+        val customFields = post.customFields.map { cf =>
+          cf.copy(postId = post.id)
+        }
+        // return updated new post
+        post.copy(id = postId, categories = categories, tags = tags, customFields = customFields)
+      }
+    }
+  }
 }

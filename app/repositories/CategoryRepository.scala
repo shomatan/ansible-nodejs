@@ -40,6 +40,15 @@ class CategoryRepository @Inject() (protected val dbConfigProvider: DatabaseConf
       .to[List].result
   }
 
+  def insertOrUpdate(categories: Seq[Category]) = {
+    DBIO.sequence(categories.map { current =>
+      slickCategories.filter(_.name === current.name).result.headOption.flatMap {
+        case Some(category) => DBIO.successful(category)
+        case None => slickCategories.returning(slickCategories) += DBCategory(0, current.name)
+      }
+    })
+  }
+
   case class DBPostCategory(postId: Long, categoryId: Long)
 
   class PostCategory(tag: Tag) extends Table[DBPostCategory](tag, "post_category") {

@@ -39,6 +39,15 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       .to[List].result
   }
 
+  def insertOrUpdate(tags: Seq[me.shoma.play_cms.models.Tag]) = {
+    DBIO.sequence(tags.map { current =>
+      slickTags.filter(_.name === current.name).result.headOption.flatMap {
+        case Some(tag) => DBIO.successful(tag)
+        case None => slickTags.returning(slickTags) += DBTag(0, current.name)
+      }
+    })
+  }
+
   case class DBPostTag(postId: Long, tagId: Long)
 
   class PostTag(tag: Tag) extends Table[DBPostTag](tag, "post_tag") {
