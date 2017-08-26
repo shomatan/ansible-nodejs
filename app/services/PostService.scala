@@ -12,6 +12,8 @@ import slick.jdbc.JdbcProfile
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 
+case class PostResult(posts: List[Post], page: Int, pageSize: Int, total: Long)
+
 class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvider)
                             (postRepository: PostRepository,
                              categoryRepository: CategoryRepository,
@@ -20,17 +22,18 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
 
   import profile.api._
 
-  def list(page: Int = 0, pageSize: Int = 10): Future[List[Post]] = {
+  def list(page: Int = 0, pageSize: Int = 10): Future[PostResult] = {
 
     val action = (for {
       query <- postRepository.list(page, pageSize)
+      total <- postRepository.total
       categories <- categoryRepository.findByPost(query.map(_.id))
       postTag <- tagRepository.findByPost(query.map(_.id))
       postCustomField <- customFieldRepository.findByPost(query.map(_.id))
-    } yield (query, categories, postTag, postCustomField)).transactionally
+    } yield (query, categories, postTag, postCustomField, total)).transactionally
 
     db.run(action).map { resultOption =>
-      resultOption._1.map {
+      val posts = resultOption._1.map {
         case (post) =>
           Post(
             post.id,
@@ -54,6 +57,7 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
           )
       }
+      PostResult(posts, page, pageSize, resultOption._5)
     }
   }
 

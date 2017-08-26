@@ -35,4 +35,9 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
     Posts.returning(Posts).insertOrUpdate(dbPost)
   }
+
+  def total = {
+
+    Posts.filter(_.postedAt < ZonedDateTime.now.toEpochSecond).length.result
+  }
 }

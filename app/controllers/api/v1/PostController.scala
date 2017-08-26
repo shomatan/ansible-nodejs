@@ -53,9 +53,12 @@ class PostController @Inject()(
   implicit val postFormat = Json.format[Post]
 
   def list = Action.async {
-    postService.list().map { case (posts) =>
-      val json = Json.toJson(posts)
-      Ok(json)
+    postService.list().map { case (result) =>
+      Ok(Json.obj(
+        "result" -> "success",
+        "posts" -> Json.toJson(result.posts),
+        "total" -> JsNumber(result.total)
+      ))
     }
   }
 
