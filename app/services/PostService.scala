@@ -45,6 +45,7 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
                 cf.customFieldType match {
                   case StringCustomField.typeId => cf.value.toString
                   case IntCustomField.typeId => cf.value.toInt
+                  case BigDecimalCustomField.typeId => BigDecimal(cf.value)
                 }
               )
             },
