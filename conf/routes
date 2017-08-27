@@ -4,7 +4,7 @@
 # ~~~~
 
 # Posts
-GET     /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.list
+GET     /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.list(page: Option[Int], perPage: Option[Int])
 GET     /api/v1/posts/:id           me.shoma.play_cms.controllers.api.v1.PostController.find(id: Long)
 POST    /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.post
 

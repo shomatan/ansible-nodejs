@@ -22,10 +22,10 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
 
   import profile.api._
 
-  def list(page: Int = 0, pageSize: Int = 10): Future[PostResult] = {
+  def list(page: Int = 0, perPage: Int = 10): Future[PostResult] = {
 
     val action = (for {
-      query <- postRepository.list(page, pageSize)
+      query <- postRepository.list(page, perPage)
       total <- postRepository.total
       categories <- categoryRepository.findByPost(query.map(_.id))
       postTag <- tagRepository.findByPost(query.map(_.id))
@@ -57,7 +57,7 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
           )
       }
-      PostResult(posts, page, pageSize, resultOption._5)
+      PostResult(posts, page, perPage, resultOption._5)
     }
   }
 

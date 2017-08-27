@@ -13,9 +13,9 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   import profile.api._
 
-  def list(page: Int = 0, pageSize: Int = 10) = {
-    val offset = pageSize * page
-    Posts.sortBy(_.id.desc).drop(offset).take(pageSize).to[List].result
+  def list(page: Int = 1, perPage: Int = 10) = {
+    val offset = perPage * (page - 1)
+    Posts.sortBy(_.id.desc).drop(offset).take(perPage).to[List].result
   }
 
   def find(id: Long) = {

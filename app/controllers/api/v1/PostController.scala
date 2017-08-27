@@ -52,12 +52,17 @@ class PostController @Inject()(
   implicit val tagFormat = Json.format[Tag]
   implicit val postFormat = Json.format[Post]
 
-  def list = Action.async {
-    postService.list().map { case (result) =>
+  def list(page: Option[Int], perPage: Option[Int]) = Action.async {
+    val pageNumber = page.getOrElse(1)
+    val perPageNumber = perPage.getOrElse(10)
+
+    postService.list(page = pageNumber, perPage = perPageNumber).map { case (result) =>
       Ok(Json.obj(
         "result" -> "success",
         "posts" -> Json.toJson(result.posts),
-        "total" -> JsNumber(result.total)
+        "total" -> JsNumber(result.total),
+        "page" -> JsNumber(pageNumber),
+        "perPage" -> JsNumber(perPageNumber)
       ))
     }
   }
