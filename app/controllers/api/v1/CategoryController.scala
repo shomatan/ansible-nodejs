@@ -17,10 +17,8 @@ class CategoryController @Inject()(
   implicit val categoryFormat = Json.format[Category]
 
   def list = Action.async {
-
-    repository.list.map { case (categories) =>
-      val json = Json.toJson(categories)
-      Ok(json)
+    repository.list.map {
+      case (categories) => Ok(Json.obj("categories" -> Json.toJson(categories)))
     }
   }
 }

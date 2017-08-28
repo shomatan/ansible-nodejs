@@ -17,10 +17,8 @@ class TagController @Inject()(
   implicit val tagFormat = Json.format[Tag]
 
   def list = Action.async {
-
-    repository.list.map { case (tags) =>
-      val json = Json.toJson(tags)
-      Ok(json)
+    repository.list.map {
+      case (tags) => Ok(Json.obj("tags" -> Json.toJson(tags)))
     }
   }
 }
