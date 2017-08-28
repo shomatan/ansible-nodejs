@@ -58,7 +58,6 @@ class PostController @Inject()(
 
     postService.list(page = pageNumber, perPage = perPageNumber).map { case (result) =>
       Ok(Json.obj(
-        "result" -> "success",
         "posts" -> Json.toJson(result.posts),
         "total" -> JsNumber(result.total),
         "page" -> JsNumber(pageNumber),
@@ -69,8 +68,8 @@ class PostController @Inject()(
 
   def find(id: Long) = Action.async { implicit request =>
     postService.find(id).map {
-      case Some(p) => Ok(Json.toJson(p))
-      case _ => NotFound(Json.obj("result" ->"failure", "error" -> "The requested ID does not exist."))
+      case Some(p) => Ok(Json.obj("post" -> Json.toJson(p)))
+      case _ => NotFound(Json.obj("error" -> Json.obj("message" -> "The requested ID does not exist.")))
     }
   }
 
@@ -78,12 +77,12 @@ class PostController @Inject()(
   //def post() = silhouette.SecuredAction.async {
 
     request.body.validate[Post].map { post =>
-
       postService.save(post).map { p =>
-        Ok(Json.obj("result" -> "success", "post" -> p)) }
+        Ok(Json.obj("post" -> p))
+      }
     }.recoverTotal { e =>
       Future {
-        BadRequest(Json.obj("result" ->"failure", "error" -> JsError.toJson(e)))
+        BadRequest(Json.obj("error" -> JsError.toJson(e)))
       }
     }
   }
