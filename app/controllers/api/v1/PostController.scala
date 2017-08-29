@@ -59,10 +59,9 @@ class PostController @Inject()(
     postService.list(page = pageNumber, perPage = perPageNumber).map { case (result) =>
       Ok(Json.obj(
         "posts" -> Json.toJson(result.posts),
-        "total" -> JsNumber(result.total),
         "page" -> JsNumber(pageNumber),
         "perPage" -> JsNumber(perPageNumber)
-      ))
+      )).withHeaders("X-Total-Count" -> result.total.toString)
     }
   }
 
