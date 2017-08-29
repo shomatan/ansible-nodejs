@@ -35,7 +35,8 @@ create table posts (
   , content     TEXT      NOT NULL
   , created_at  BIGINT    NOT NULL
   , updated_at  BIGINT    NOT NULL
-  , posted_at  BIGINT    NOT NULL
+  , posted_at   BIGINT    NOT NULL
+  , deleted_at  BIGINT
 );
 
 create table categories (

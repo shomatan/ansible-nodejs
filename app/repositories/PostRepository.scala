@@ -15,11 +15,19 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
 
   def list(page: Int = 1, perPage: Int = 10) = {
     val offset = perPage * (page - 1)
-    Posts.sortBy(_.id.desc).drop(offset).take(perPage).to[List].result
+    Posts
+      .filter(_.deletedAt.isEmpty)
+      .sortBy(_.id.desc)
+      .drop(offset)
+      .take(perPage)
+      .to[List].result
   }
 
   def find(id: Long) = {
-    Posts.filter(_.id === id).result.headOption
+    Posts
+      .filter(_.deletedAt.isEmpty)
+      .filter(_.id === id)
+      .result.headOption
   }
 
   def save(post: Post) = {
@@ -30,14 +38,16 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       post.content,
       post.createdAt.toInstant.getEpochSecond,
       post.updatedAt.toInstant.getEpochSecond,
-      post.postedAt.toInstant.getEpochSecond
+      post.postedAt.toInstant.getEpochSecond,
+      post.deletedAt
     )
 
     Posts.returning(Posts).insertOrUpdate(dbPost)
   }
 
   def total = {
-
-    Posts.filter(_.postedAt < ZonedDateTime.now.toEpochSecond).length.result
+    Posts.filter(_.deletedAt.isEmpty)
+      .filter(_.postedAt < ZonedDateTime.now.toEpochSecond)
+      .length.result
   }
 }

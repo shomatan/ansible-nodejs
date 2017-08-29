@@ -11,7 +11,8 @@ case class Post(
                  customFields: Seq[CustomField],
                  createdAt: ZonedDateTime = ZonedDateTime.now(),
                  updatedAt: ZonedDateTime = ZonedDateTime.now(),
-                 postedAt: ZonedDateTime
+                 postedAt: ZonedDateTime,
+                 deletedAt: Option[Long]
                )
 
 
