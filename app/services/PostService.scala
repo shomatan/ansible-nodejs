@@ -54,7 +54,8 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
             },
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
             ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
-            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
+            ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault()),
+            post.deletedAt
           )
       }
       PostResult(posts, page, perPage, resultOption._5)
@@ -92,7 +93,8 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
           },
           ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.createdAt), ZoneId.systemDefault()),
           ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.updatedAt), ZoneId.systemDefault()),
-          ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault())
+          ZonedDateTime.ofInstant(Instant.ofEpochSecond(post.postedAt), ZoneId.systemDefault()),
+          post.deletedAt
         ))
       }
       case _ => None
@@ -107,7 +109,8 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
       post.content,
       post.createdAt.toInstant.getEpochSecond,
       post.updatedAt.toInstant.getEpochSecond,
-      post.postedAt.toInstant.getEpochSecond
+      post.postedAt.toInstant.getEpochSecond,
+      post.deletedAt
     )
 
     val actions = (for {

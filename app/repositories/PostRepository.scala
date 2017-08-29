@@ -30,7 +30,8 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
       post.content,
       post.createdAt.toInstant.getEpochSecond,
       post.updatedAt.toInstant.getEpochSecond,
-      post.postedAt.toInstant.getEpochSecond
+      post.postedAt.toInstant.getEpochSecond,
+      post.deletedAt
     )
 
     Posts.returning(Posts).insertOrUpdate(dbPost)

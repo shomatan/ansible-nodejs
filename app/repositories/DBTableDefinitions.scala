@@ -97,8 +97,9 @@ trait DBTableDefinitions extends HasDatabaseConfigProvider[JdbcProfile] {
     def createdAt = column[Long]("created_at")
     def updatedAt = column[Long]("updated_at")
     def postedAt = column[Long]("posted_at")
+    def deletedAt = column[Option[Long]]("deleted_at")
 
-    def * = (id, title, content, createdAt, updatedAt, postedAt) <> (DBPost.tupled, DBPost.unapply _)
+    def * = (id, title, content, createdAt, updatedAt, postedAt, deletedAt) <> (DBPost.tupled, DBPost.unapply _)
   }
 
   // --------------------------------------------------------------------------
@@ -121,5 +122,6 @@ case class DBPost(
                    content: String,
                    createdAt: Long,
                    updatedAt: Long,
-                   postedAt: Long
+                   postedAt: Long,
+                   deletedAt: Option[Long]
                  )
