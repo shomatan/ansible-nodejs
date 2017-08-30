@@ -8,9 +8,14 @@ lazy val commonSettings = Seq(
 
 lazy val `ayumi` = (project in file("."))
   .enablePlugins(PlayScala)
+  .aggregate(model)
+  .dependsOn(model)
   .settings(
     commonSettings
   )
+
+lazy val model = (project in file("app/model"))
+  .settings(commonSettings)
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
       

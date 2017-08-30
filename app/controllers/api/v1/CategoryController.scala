@@ -2,8 +2,8 @@ package me.shoma.ayumi.controllers.api.v1
 
 import javax.inject._
 
-import me.shoma.ayumi.models.Category
 import me.shoma.ayumi.repositories.CategoryRepository
+import me.shoma.ayumi.model.Category
 import play.api.libs.json.{JsError, Json}
 import play.api.mvc._
 

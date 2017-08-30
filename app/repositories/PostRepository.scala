@@ -3,7 +3,7 @@ package me.shoma.ayumi.repositories
 import java.time.{Instant, ZoneId, ZonedDateTime}
 import javax.inject.Inject
 
-import me.shoma.ayumi.models._
+import me.shoma.ayumi.model._
 import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future

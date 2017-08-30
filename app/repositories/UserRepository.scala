@@ -5,7 +5,7 @@ import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.util.PasswordInfo
-import me.shoma.ayumi.models.User
+import me.shoma.ayumi.model.User
 import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future

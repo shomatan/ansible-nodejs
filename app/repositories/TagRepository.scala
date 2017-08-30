@@ -11,14 +11,14 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
 
   import profile.api._
 
-  def list: Future[List[me.shoma.ayumi.models.Tag]] = {
+  def list: Future[List[me.shoma.ayumi.model.Tag]] = {
 
     val action = Tags.sortBy(_.name.asc).to[List].result
 
     db.run(action).map { resultOption =>
       resultOption.map {
         case (tag) =>
-          me.shoma.ayumi.models.Tag(
+          me.shoma.ayumi.model.Tag(
             Some(tag.id),
             tag.name
           )
@@ -39,7 +39,7 @@ class TagRepository @Inject()(protected val dbConfigProvider: DatabaseConfigProv
       .to[List].result
   }
 
-  def insertOrUpdate(tags: Seq[me.shoma.ayumi.models.Tag]) = {
+  def insertOrUpdate(tags: Seq[me.shoma.ayumi.model.Tag]) = {
     DBIO.sequence(tags.map { current =>
       Tags.filter(_.name === current.name).result.headOption.flatMap {
         case Some(tag) => DBIO.successful(tag)

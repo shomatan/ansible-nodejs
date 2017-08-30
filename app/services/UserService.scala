@@ -2,7 +2,7 @@ package me.shoma.ayumi.services
 
 import scala.concurrent.Future
 import com.mohiva.play.silhouette.api.services.IdentityService
-import me.shoma.ayumi.models.User
+import me.shoma.ayumi.model.User
 
 /**
   * Handles actions to users.

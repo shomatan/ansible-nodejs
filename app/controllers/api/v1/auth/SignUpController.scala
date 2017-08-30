@@ -13,9 +13,9 @@ import play.api.i18n.Messages
 import play.api.libs.json.{JsError, Json}
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.{AbstractController, ControllerComponents}
-import me.shoma.ayumi.models.User
 import me.shoma.ayumi.services.UserService
 import me.shoma.ayumi.utils.authentication.DefaultEnv
+import me.shoma.ayumi.model.User
 
 class SignUpController @Inject() (
                                    cc: ControllerComponents,
