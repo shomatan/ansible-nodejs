@@ -1,13 +1,13 @@
-package me.shoma.play_cms.controllers.api.v1
+package me.shoma.ayumi.controllers.api.v1
 
 import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject._
 
 import com.mohiva.play.silhouette.api.Silhouette
-import me.shoma.play_cms.models._
-import me.shoma.play_cms.repositories.PostRepository
-import me.shoma.play_cms.utils.authentication.DefaultEnv
+import me.shoma.ayumi.models._
+import me.shoma.ayumi.repositories.PostRepository
+import me.shoma.ayumi.utils.authentication.DefaultEnv
 import play.api.mvc._
 import play.api.libs.json.{JsError, Json}
 import play.api.libs.json._

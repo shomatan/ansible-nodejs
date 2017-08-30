@@ -1,4 +1,4 @@
-package me.shoma.play_cms.controllers.api.v1.auth
+package me.shoma.ayumi.controllers.api.v1.auth
 
 import javax.inject.Inject
 
@@ -8,8 +8,8 @@ import com.mohiva.play.silhouette.api.{LoginEvent, LoginInfo, SignUpEvent, Silho
 import com.mohiva.play.silhouette.api.util.{Clock, Credentials}
 import com.mohiva.play.silhouette.impl.exceptions.IdentityNotFoundException
 import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
-import me.shoma.play_cms.services.UserService
-import me.shoma.play_cms.utils.authentication.DefaultEnv
+import me.shoma.ayumi.services.UserService
+import me.shoma.ayumi.utils.authentication.DefaultEnv
 import play.api.Configuration
 import play.api.i18n.I18nSupport
 import play.api.libs.json.{JsError, Json}

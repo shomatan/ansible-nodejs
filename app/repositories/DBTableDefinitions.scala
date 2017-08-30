@@ -1,4 +1,4 @@
-package me.shoma.play_cms.repositories
+package me.shoma.ayumi.repositories
 
 import java.time.{Instant, ZoneId, ZonedDateTime}
 

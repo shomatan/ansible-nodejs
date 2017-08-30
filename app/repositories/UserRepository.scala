@@ -1,11 +1,11 @@
-package me.shoma.play_cms.repositories
+package me.shoma.ayumi.repositories
 
 import java.util.UUID
 import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.LoginInfo
 import com.mohiva.play.silhouette.api.util.PasswordInfo
-import me.shoma.play_cms.models.User
+import me.shoma.ayumi.models.User
 import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future

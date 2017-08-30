@@ -1,9 +1,9 @@
-package me.shoma.play_cms.controllers.api.v1
+package me.shoma.ayumi.controllers.api.v1
 
 import javax.inject._
 
-import me.shoma.play_cms.models.Tag
-import me.shoma.play_cms.repositories.TagRepository
+import me.shoma.ayumi.models.Tag
+import me.shoma.ayumi.repositories.TagRepository
 import play.api.libs.json.Json
 import play.api.mvc._
 

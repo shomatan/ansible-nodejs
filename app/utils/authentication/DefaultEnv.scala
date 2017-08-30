@@ -1,8 +1,8 @@
-package me.shoma.play_cms.utils.authentication
+package me.shoma.ayumi.utils.authentication
 
 import com.mohiva.play.silhouette.api.Env
 import com.mohiva.play.silhouette.impl.authenticators.JWTAuthenticator
-import me.shoma.play_cms.models.User
+import me.shoma.ayumi.models.User
 
 /** The default Silhouette Environment.
   */

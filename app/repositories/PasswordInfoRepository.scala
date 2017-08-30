@@ -1,4 +1,4 @@
-package me.shoma.play_cms.repositories
+package me.shoma.ayumi.repositories
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global

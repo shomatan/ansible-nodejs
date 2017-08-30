@@ -1,8 +1,8 @@
-package me.shoma.play_cms.repositories
+package me.shoma.ayumi.repositories
 
 import javax.inject.Inject
 
-import me.shoma.play_cms.models.Category
+import me.shoma.ayumi.models.Category
 import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future

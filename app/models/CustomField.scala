@@ -1,4 +1,4 @@
-package me.shoma.play_cms.models
+package me.shoma.ayumi.models
 
 // sealed trait CustomField
 

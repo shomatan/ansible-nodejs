@@ -1,6 +1,6 @@
 package auth
 
-import me.shoma.play_cms.controllers.api.v1.auth.SignUpController
+import me.shoma.ayumi.controllers.api.v1.auth.SignUpController
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.PlaySpec
 import play.api.db.DBApi

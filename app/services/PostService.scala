@@ -3,8 +3,8 @@ package services
 import java.time.{Instant, ZoneId, ZonedDateTime}
 import javax.inject.Inject
 
-import me.shoma.play_cms.models._
-import me.shoma.play_cms.repositories._
+import me.shoma.ayumi.models._
+import me.shoma.ayumi.repositories._
 import play.api.db.slick.{DatabaseConfigProvider, HasDatabaseConfigProvider}
 
 import slick.jdbc.JdbcProfile
@@ -40,7 +40,7 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
             post.title,
             post.content,
             resultOption._2.filter(_._1.postId == post.id).map(_._2).map { c => Category(Option(c.get.id), c.get.name) },
-            resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.play_cms.models.Tag(Option(t.get.id), t.get.name) },
+            resultOption._3.filter(_._1.postId == post.id).map(_._2).map { t => me.shoma.ayumi.models.Tag(Option(t.get.id), t.get.name) },
             resultOption._4.filter(_.postId == post.id).map { cf =>
               CustomField(
                 post.id,
@@ -79,7 +79,7 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
           post.title,
           post.content,
           categories.map { c => Category(Option(c._2.get.id), c._2.get.name) },
-          tags.map { t => me.shoma.play_cms.models.Tag(Option(t._2.get.id), t._2.get.name) },
+          tags.map { t => me.shoma.ayumi.models.Tag(Option(t._2.get.id), t._2.get.name) },
           customFields.map { c =>
             CustomField(
               post.id,
