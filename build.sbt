@@ -1,4 +1,4 @@
-name := "play_cms"
+name := "ayumi"
 
 lazy val commonSettings = Seq(
   organization := "shoma.me",
@@ -6,11 +6,16 @@ lazy val commonSettings = Seq(
   scalaVersion := "2.12.2"
 )
 
-lazy val `play_cms` = (project in file("."))
+lazy val `ayumi` = (project in file("."))
   .enablePlugins(PlayScala)
+  .aggregate(model)
+  .dependsOn(model)
   .settings(
     commonSettings
   )
+
+lazy val model = (project in file("app/model"))
+  .settings(commonSettings)
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
       

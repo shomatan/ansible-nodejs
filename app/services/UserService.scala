@@ -1,8 +1,8 @@
-package me.shoma.play_cms.services
+package me.shoma.ayumi.services
 
 import scala.concurrent.Future
 import com.mohiva.play.silhouette.api.services.IdentityService
-import me.shoma.play_cms.models.User
+import me.shoma.ayumi.model.User
 
 /**
   * Handles actions to users.

@@ -1,10 +1,10 @@
-package me.shoma.play_cms.services
+package me.shoma.ayumi.services
 
 import javax.inject.Inject
 
 import com.mohiva.play.silhouette.api.LoginInfo
-import me.shoma.play_cms.models.User
-import me.shoma.play_cms.repositories.UserRepository
+import me.shoma.ayumi.repositories.UserRepository
+import me.shoma.ayumi.model.User
 
 import scala.concurrent.Future
 

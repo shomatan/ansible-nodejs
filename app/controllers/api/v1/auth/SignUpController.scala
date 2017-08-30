@@ -1,4 +1,4 @@
-package me.shoma.play_cms.controllers.api.v1.auth
+package me.shoma.ayumi.controllers.api.v1.auth
 
 import java.time.ZonedDateTime
 import java.util.UUID
@@ -13,9 +13,9 @@ import play.api.i18n.Messages
 import play.api.libs.json.{JsError, Json}
 import play.api.libs.json.Json.toJsFieldJsValueWrapper
 import play.api.mvc.{AbstractController, ControllerComponents}
-import me.shoma.play_cms.models.User
-import me.shoma.play_cms.services.UserService
-import me.shoma.play_cms.utils.authentication.DefaultEnv
+import me.shoma.ayumi.services.UserService
+import me.shoma.ayumi.utils.authentication.DefaultEnv
+import me.shoma.ayumi.model.User
 
 class SignUpController @Inject() (
                                    cc: ControllerComponents,

@@ -4,16 +4,16 @@
 # ~~~~
 
 # Posts
-GET     /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.list(page: Option[Int], perPage: Option[Int])
-GET     /api/v1/posts/:id           me.shoma.play_cms.controllers.api.v1.PostController.find(id: Long)
-POST    /api/v1/posts               me.shoma.play_cms.controllers.api.v1.PostController.post
+GET     /api/v1/posts               me.shoma.ayumi.controllers.api.v1.PostController.list(page: Option[Int], perPage: Option[Int])
+GET     /api/v1/posts/:id           me.shoma.ayumi.controllers.api.v1.PostController.find(id: Long)
+POST    /api/v1/posts               me.shoma.ayumi.controllers.api.v1.PostController.post
 
 # Category
-GET     /api/v1/categories          me.shoma.play_cms.controllers.api.v1.CategoryController.list
+GET     /api/v1/categories          me.shoma.ayumi.controllers.api.v1.CategoryController.list
 
 # Tag
-GET     /api/v1/tags                me.shoma.play_cms.controllers.api.v1.TagController.list
+GET     /api/v1/tags                me.shoma.ayumi.controllers.api.v1.TagController.list
 
 # Authentication
-POST    /api/v1/auth/signUp         me.shoma.play_cms.controllers.api.v1.auth.SignUpController.submit
-POST    /api/v1/auth/signIn         me.shoma.play_cms.controllers.api.v1.auth.SignInController.submit
+POST    /api/v1/auth/signUp         me.shoma.ayumi.controllers.api.v1.auth.SignUpController.submit
+POST    /api/v1/auth/signIn         me.shoma.ayumi.controllers.api.v1.auth.SignInController.submit

@@ -1,4 +1,4 @@
-package me.shoma.play_cms.modules
+package me.shoma.ayumi.modules
 
 import play.api.Configuration
 import play.api.libs.concurrent.AkkaGuiceSupport
@@ -22,9 +22,9 @@ import com.mohiva.play.silhouette.password.BCryptPasswordHasher
 import com.mohiva.play.silhouette.persistence.daos.{DelegableAuthInfoDAO, InMemoryAuthInfoDAO}
 import com.mohiva.play.silhouette.persistence.repositories.DelegableAuthInfoRepository
 
-import me.shoma.play_cms.repositories.PasswordInfoRepository
-import me.shoma.play_cms.services.{UserService, UserServiceImpl}
-import me.shoma.play_cms.utils.authentication.DefaultEnv
+import me.shoma.ayumi.repositories.PasswordInfoRepository
+import me.shoma.ayumi.services.{UserService, UserServiceImpl}
+import me.shoma.ayumi.utils.authentication.DefaultEnv
 
 import scala.concurrent.ExecutionContext.Implicits.global
 

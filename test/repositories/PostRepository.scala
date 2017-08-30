@@ -2,8 +2,8 @@ package repositories
 
 import java.time.ZonedDateTime
 
-import me.shoma.play_cms.models.{Category, CustomField, Post, Tag}
-import me.shoma.play_cms.repositories.PostRepository
+import me.shoma.ayumi.model.Tag
+import me.shoma.ayumi.repositories.PostRepository
 import org.scalatest.BeforeAndAfterAll
 import org.scalatestplus.play.PlaySpec
 import play.api.Application
