@@ -18,7 +18,7 @@ class CategoryController @Inject()(
 
   def list = Action.async {
     repository.list.map {
-      case (categories) => Ok(Json.obj("categories" -> Json.toJson(categories)))
+      case (categories) => Ok(Json.toJson(categories))
     }
   }
 }
