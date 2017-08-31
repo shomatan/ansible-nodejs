@@ -1,0 +1,6 @@
+.idea
+.git
+logs
+target/
+project/project
+project/target
