@@ -18,7 +18,7 @@ class TagController @Inject()(
 
   def list = Action.async {
     repository.list.map {
-      case (tags) => Ok(Json.obj("tags" -> Json.toJson(tags)))
+      case (tags) => Ok(Json.toJson(tags))
     }
   }
 }
