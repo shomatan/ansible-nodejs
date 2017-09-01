@@ -11,6 +11,8 @@ services:
       POSTGRES_PASSWORD: cms
     ports:
       - "5555:5432"
+    volumes:
+      - ./volumes/db:/var/lib/postgresql/data
     restart: always
 
   db-test:
