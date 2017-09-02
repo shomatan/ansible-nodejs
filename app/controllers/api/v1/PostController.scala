@@ -68,7 +68,7 @@ class PostController @Inject()(
 
   def find(id: Long) = Action.async { implicit request =>
     postService.find(id).map {
-      case Some(p) => Ok(Json.obj("post" -> Json.toJson(p)))
+      case Some(p) => Ok(Json.toJson(p))
       case _ => NotFound(Json.obj("error" -> Json.obj("message" -> "The requested ID does not exist.")))
     }
   }
@@ -78,7 +78,7 @@ class PostController @Inject()(
 
     request.body.validate[Post].map { post =>
       postService.save(post).map { p =>
-        Ok(Json.obj("post" -> p))
+        Ok(Json.toJson(p))
       }
     }.recoverTotal { e =>
       Future {
