@@ -21,7 +21,6 @@ class CustomFieldRepository @Inject() (protected val dbConfigProvider: DatabaseC
 
   def sync(post: DBPost, customFields: Seq[CustomField]) = {
 
-    println(customFields)
     for {
       _ <- DBIO.seq(CustomFields.filter(_.postId === post.id).delete)
       _ <- DBIO.sequence(customFields.map { current =>
