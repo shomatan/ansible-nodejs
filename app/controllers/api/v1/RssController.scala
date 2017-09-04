@@ -61,10 +61,17 @@ class RssController @Inject()( cc: ControllerComponents,
           case Some(s) => entry.setLink(s"$url${s.value.toString}${p.id}")
           case _ => entry.setLink(s"$url/${p.id}")
         }
+        val categories = p.categories.map { c =>
+          val category = new SyndCategoryImpl()
+          category.setName(c.name)
+          category.asInstanceOf[SyndCategory]
+        }
+        entry.setCategories(categories.asJava)
         entry.setTitle(p.title)
         entry.setPublishedDate(Date.from(p.postedAt.toInstant))
         entry.asInstanceOf[SyndEntry]
       }
+
       feed.setEntries(entries.asJava)
       feed
     }
