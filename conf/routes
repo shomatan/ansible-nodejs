@@ -17,6 +17,9 @@ GET     /api/v1/tags                me.shoma.ayumi.controllers.api.v1.TagControl
 # Mail
 POST    /api/v1/mail/send           me.shoma.ayumi.controllers.api.v1.EmailController.send
 
+# RSS
+GET     /api/v1/feed                me.shoma.ayumi.controllers.api.v1.RssController.feed
+
 # Authentication
 POST    /api/v1/auth/signUp         me.shoma.ayumi.controllers.api.v1.auth.SignUpController.submit
 POST    /api/v1/auth/signIn         me.shoma.ayumi.controllers.api.v1.auth.SignInController.submit

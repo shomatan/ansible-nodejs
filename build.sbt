@@ -33,6 +33,7 @@ libraryDependencies ++= Seq(
   "com.typesafe.play"       %% "play-slick-evolutions"            % "3.0.0",
   "com.typesafe.play"       %% "play-mailer"                      % "6.0.1",
   "com.typesafe.play"       %% "play-mailer-guice"                % "6.0.1",
+  "com.rometools"           %  "rome"                             % "1.7.4",
   "org.postgresql"          %  "postgresql"                       % "42.1.1",
   "net.codingwell"          %% "scala-guice"                      % "4.1.0",
   "com.iheart"              %% "ficus"                            % "1.4.1",        // config lib, used by Silhouette,
