@@ -19,52 +19,54 @@ class RssController @Inject()( cc: ControllerComponents,
   case class RssSetting(title: String, url: String, description: String)
 
   def feed = Action.async { implicit request =>
-    val ret = for {
-      feed <- createFeed()
-      entry <- createEntry(feed.getLink)
-    } yield (feed, entry)
 
-    ret.map { ent =>
-      ent._1.setEntries(ent._2.asJava)
+    val feed = for {
+      settings <- settingService.all()
+      feed <- createFeed(settings)
+    } yield (feed)
+
+    feed.map { f =>
       val output = new SyndFeedOutput
-      val t = output.outputString(ent._1)
-      Ok(t)
+      val xml = output.outputString(f)
+      Ok(xml)
     }
   }
 
-  def createFeed(): Future[SyndFeed] = {
-    settingService.all().map { s =>
-      val feed = new SyndFeedImpl
-      feed.setFeedType("rss_2.0")
+  def createFeed(settings: List[Setting]): Future[SyndFeed] = {
 
-      val url = s.find(_.key == Setting.url)
-      if(url.isDefined) {
-        feed.setLink(url.get.value.toString)
-      }
+    val feed = new SyndFeedImpl
+    feed.setFeedType("rss_2.0")
 
-      val title = s.find(_.key == Setting.title)
-      if(title.isDefined) {
-        feed.setTitle(title.get.value.toString)
-      }
-
-      val description = s.find(_.key == Setting.description)
-      if(description.isDefined) {
-        feed.setDescription(description.get.value.toString)
-      }
-      feed
+    val url = settings.find(_.key == Setting.url) match {
+      case Some(s) => s.value.toString
+      case _ => ""
     }
-  }
 
-  def createEntry(url: String): Future[List[SyndEntry]] = {
+    feed.setLink(url)
+
+    settings.find(_.key == Setting.title) match {
+      case Some(s) => feed.setTitle(s.value.toString)
+      case _ => feed.setTitle("")
+    }
+
+    settings.find(_.key == Setting.description) match {
+      case Some(s) => feed.setDescription(s.value.toString)
+      case _ => feed.setDescription("")
+    }
+
     postService.list(page = 1, perPage = 20).map { result =>
-      result.posts.map { p =>
+      val entries = result.posts.map { p =>
         val entry = new SyndEntryImpl()
+        settings.find(_.key == Setting.permalink) match {
+          case Some(s) => entry.setLink(s"$url${s.value.toString}${p.id}")
+          case _ => entry.setLink(s"$url/${p.id}")
+        }
         entry.setTitle(p.title)
-        entry.setLink(url + "/" + p.id)
         entry.setPublishedDate(Date.from(p.postedAt.toInstant))
         entry.asInstanceOf[SyndEntry]
-        entry
       }
+      feed.setEntries(entries.asJava)
+      feed
     }
   }
 }
