@@ -3,13 +3,17 @@ package me.shoma.ayumi.repositories
 import java.util.UUID
 import javax.inject.Inject
 
-import com.mohiva.play.silhouette.api.LoginInfo
+import com.mohiva.play.silhouette.api.{Identity, LoginInfo}
 import com.mohiva.play.silhouette.api.util.PasswordInfo
 import me.shoma.ayumi.model.User
 import play.api.db.slick.DatabaseConfigProvider
 
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
+
+case class UserIdentity(user: User,
+                        loginInfo: LoginInfo,
+                        passwordInfo: Option[PasswordInfo]) extends Identity
 
 class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigProvider) extends DBTableDefinitions {
 
@@ -21,7 +25,7 @@ class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     * @param loginInfo The login info of the user to find.
     * @return The found user or None if no user for the given login info could be found.
     */
-  def find(loginInfo: LoginInfo): Future[Option[User]] = {
+  def find(loginInfo: LoginInfo): Future[Option[UserIdentity]] = {
     val userQuery = for {
       dbLoginInfo <- loginInfoQuery(loginInfo)
       dbUserLoginInfo <- slickUserLoginInfos.filter(_.loginInfoId === dbLoginInfo.id)
@@ -30,15 +34,17 @@ class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     db.run(userQuery.result.headOption).map { resultOption =>
       resultOption.map {
         case (user) =>
-          User(
-            UUID.fromString(user.id),
+          UserIdentity(
+            User(
+              UUID.fromString(user.id),
+              user.firstName,
+              user.lastName,
+              user.email,
+              user.createdAt,
+              user.updatedAt
+            ),
             loginInfo,
-            user.firstName,
-            user.lastName,
-            user.email,
-            None,
-            user.createdAt,
-            user.updatedAt
+            None
           )
       }
     }
@@ -50,7 +56,7 @@ class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     * @param userID The ID of the user to find.
     * @return The found user or None if no user for the given ID could be found.
     */
-  def find(userID: UUID): Future[Option[User]] = {
+  def find(userID: UUID): Future[Option[UserIdentity]] = {
     val query = for {
       dbUser <- slickUsers.filter(_.id === userID.toString)
       dbUserLoginInfo <- slickUserLoginInfos.filter(_.userID === dbUser.id)
@@ -60,21 +66,23 @@ class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     db.run(query.result.headOption).map { resultOption =>
       resultOption.map {
         case (user, loginInfo, passwordInfo) =>
-          User(
-            UUID.fromString(user.id),
+          UserIdentity(
+            User(
+              UUID.fromString(user.id),
+              user.firstName,
+              user.lastName,
+              user.email,
+              user.createdAt,
+              user.updatedAt
+            ),
             LoginInfo(loginInfo.providerID, loginInfo.providerKey),
-            user.firstName,
-            user.lastName,
-            user.email,
-            Some(PasswordInfo(passwordInfo.hasher, passwordInfo.password, passwordInfo.salt)),
-            user.createdAt,
-            user.updatedAt
+            Some(PasswordInfo(passwordInfo.hasher, passwordInfo.password, passwordInfo.salt))
           )
       }
     }
   }
 
-  def find: Future[List[User]] = {
+  def find: Future[List[UserIdentity]] = {
     val query = for {
       dbUser <- slickUsers
       dbUserLoginInfo <- slickUserLoginInfos.filter(_.userID === dbUser.id)
@@ -84,16 +92,19 @@ class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     db.run(query.to[List].result).map { resultOption =>
       resultOption.map {
         case (user, loginInfo, passwordInfo) =>
-          User(
-            UUID.fromString(user.id),
+          UserIdentity(
+            User(
+              UUID.fromString(user.id),
+              user.firstName,
+              user.lastName,
+              user.email,
+              user.createdAt,
+              user.updatedAt
+            ),
             LoginInfo(loginInfo.providerID, loginInfo.providerKey),
-            user.firstName,
-            user.lastName,
-            user.email,
-            Some(PasswordInfo(passwordInfo.hasher, passwordInfo.password, passwordInfo.salt)),
-            user.createdAt,
-            user.updatedAt
+            Some(PasswordInfo(passwordInfo.hasher, passwordInfo.password, passwordInfo.salt))
           )
+
       }
     }
   }
@@ -104,8 +115,8 @@ class UserRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     * @param user The user to save.
     * @return The saved user.
     */
-  def save(user: User): Future[User] = {
-    val dbUser = DBUser(user.id.toString, user.firstName, user.lastName, user.email, user.createdAt, user.updatedAt)
+  def save(user: UserIdentity): Future[UserIdentity] = {
+    val dbUser = DBUser(user.user.id.toString, user.user.firstName, user.user.lastName, user.user.email, user.user.createdAt, user.user.updatedAt)
     val dbLoginInfo = DBLoginInfo(None, user.loginInfo.providerID, user.loginInfo.providerKey)
     // We don't have the LoginInfo id so we try to get it first.
     // If there is no LoginInfo yet for this user we retrieve the id on insertion.
