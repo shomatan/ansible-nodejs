@@ -16,6 +16,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import me.shoma.ayumi.services.UserService
 import me.shoma.ayumi.utils.authentication.DefaultEnv
 import me.shoma.ayumi.model.User
+import me.shoma.ayumi.repositories.UserIdentity
 
 class SignUpController @Inject() (
                                    cc: ControllerComponents,
@@ -43,15 +44,17 @@ class SignUpController @Inject() (
         userService.retrieve(loginInfo).flatMap {
           case Some(user) => Future.successful(BadRequest(Json.obj("message" -> "The E-mail address exists.")))
           case None =>
-            val user = User(
-              id = UUID.randomUUID(),
+            val user = UserIdentity(
+              User(
+                id = UUID.randomUUID(),
+                firstName = Some(data.firstName),
+                lastName = Some(data.lastName),
+                email = Some(data.email),
+                createdAt = ZonedDateTime.now(),
+                updatedAt = ZonedDateTime.now()
+              ),
               loginInfo = loginInfo,
-              firstName = Some(data.firstName),
-              lastName = Some(data.lastName),
-              email = Some(data.email),
-              passwordInfo = None,
-              createdAt = ZonedDateTime.now(),
-              updatedAt = ZonedDateTime.now()
+              passwordInfo = None
             )
 
             val authInfo = passwordHasher.hash(data.password)
