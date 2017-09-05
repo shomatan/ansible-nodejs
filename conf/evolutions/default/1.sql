@@ -86,7 +86,7 @@ INSERT INTO settings VALUES ('title',       'Ayumi CMS!',                       
 INSERT INTO settings VALUES ('url',         'http://localhost',                 1, TRUE);
 INSERT INTO settings VALUES ('description', 'A CMS powered by Play framework',  1, TRUE);
 INSERT INTO settings VALUES ('permalink',   '/post/',                           1, TRUE);
-INSERT INTO settings VALUES ('feed-count',  '10',                               1, TRUE);
+INSERT INTO settings VALUES ('feed-count',  '10',                               2, TRUE);
 
 # --- !Downs
 drop table settings;
