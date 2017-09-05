@@ -21,9 +21,11 @@ resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
       
 resolvers += "Akka Snapshot Repository" at "http://repo.akka.io/snapshots/"
 
+resolvers += "Atlassian Releases" at "https://maven.atlassian.com/public/"
+
 resolvers += Resolver.jcenterRepo
 
-val silhouetteVer = "5.0.0-RC2"
+val silhouetteVer = "5.0.0"
 
 libraryDependencies ++= Seq(
   ehcache ,
