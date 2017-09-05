@@ -38,24 +38,24 @@ class RssController @Inject()( cc: ControllerComponents,
     feed.setFeedType("rss_2.0")
 
     val url = settings.find(_.key == Setting.url) match {
-      case Some(s) => s.value.toString
+      case Some(s) => s.get
       case _ => ""
     }
 
     feed.setLink(url)
 
     settings.find(_.key == Setting.title) match {
-      case Some(s) => feed.setTitle(s.value.toString)
+      case Some(s) => feed.setTitle(s.get)
       case _ => feed.setTitle("")
     }
 
     settings.find(_.key == Setting.description) match {
-      case Some(s) => feed.setDescription(s.value.toString)
+      case Some(s) => feed.setDescription(s.get)
       case _ => feed.setDescription("")
     }
 
     val perPage = settings.find(_.key == Setting.feedCount) match {
-      case Some(s) => s.value.asInstanceOf[Int]
+      case Some(s) => s.get
       case _ => 10
     }
 
@@ -63,7 +63,7 @@ class RssController @Inject()( cc: ControllerComponents,
       val entries = result.posts.map { p =>
         val entry = new SyndEntryImpl()
         settings.find(_.key == Setting.permalink) match {
-          case Some(s) => entry.setLink(s"$url${s.value.toString}${p.id}")
+          case Some(s) => entry.setLink(s"$url${s.get}${p.id}")
           case _ => entry.setLink(s"$url/${p.id}")
         }
         val categories = p.categories.map { c =>
