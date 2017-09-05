@@ -54,7 +54,12 @@ class RssController @Inject()( cc: ControllerComponents,
       case _ => feed.setDescription("")
     }
 
-    postService.list(page = 1, perPage = 20).map { result =>
+    val perPage = settings.find(_.key == Setting.feedCount) match {
+      case Some(s) => s.value.asInstanceOf[Int]
+      case _ => 10
+    }
+
+    postService.list(page = 1, perPage = perPage).map { result =>
       val entries = result.posts.map { p =>
         val entry = new SyndEntryImpl()
         settings.find(_.key == Setting.permalink) match {

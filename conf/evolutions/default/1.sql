@@ -74,7 +74,23 @@ INSERT INTO login_info (provider_id, provider_key) VALUES ('credentials', 'admin
 INSERT INTO user_login_info VALUES ('c622137e-d45f-4542-bd46-934d3e8a0dd7', 1);
 INSERT INTO password_info VALUES ('bcrypt', '$2a$10$TgaGi7bBm9BGjVvq9H/pOucAUq6gVin.nrtDw5wz7Ux0NZyXzxieq', NULL, 1);
 
+CREATE TABLE settings (
+    setting_name   VARCHAR NOT NULL UNIQUE
+  , value          VARCHAR NOT NULL
+  , value_type     INT     NOT NULL
+  , protect        BOOL    NOT NULL
+  , PRIMARY KEY (setting_name)
+);
+
+INSERT INTO settings VALUES ('title',       'Ayumi CMS!',                       1, TRUE);
+INSERT INTO settings VALUES ('url',         'http://localhost',                 1, TRUE);
+INSERT INTO settings VALUES ('description', 'A CMS powered by Play framework',  1, TRUE);
+INSERT INTO settings VALUES ('permalink',   '/post/',                           1, TRUE);
+INSERT INTO settings VALUES ('feed-count',  '10',                               1, TRUE);
+
 # --- !Downs
+drop table settings;
+
 drop table post_custom_fields;
 drop table post_tag;
 drop table post_category;
