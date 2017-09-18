@@ -129,4 +129,8 @@ class PostService @Inject() (protected val dbConfigProvider: DatabaseConfigProvi
     // run actions and return user afterwards
     db.run(actions).map(_ => post)
   }
+
+  def softDelete(id: Long) = db.run(postRepository.softDelete(id)).map(_ => id)
+
+  def forceDelete(id: Long) = db.run(postRepository.forceDelete(id)).map(_ => id)
 }

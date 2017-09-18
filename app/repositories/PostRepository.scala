@@ -45,6 +45,16 @@ class PostRepository @Inject() (protected val dbConfigProvider: DatabaseConfigPr
     Posts.returning(Posts).insertOrUpdate(dbPost)
   }
 
+  def softDelete(id: Long) =
+    Posts
+      .filter(_.id === id)
+      .map(_.deletedAt)
+      .update(Some(ZonedDateTime.now.toEpochSecond))
+
+
+  def forceDelete(id: Long) =
+    Posts.filter(_.id === id).delete
+
   def total = {
     Posts.filter(_.deletedAt.isEmpty)
       .filter(_.postedAt < ZonedDateTime.now.toEpochSecond)

@@ -87,6 +87,18 @@ class PostController @Inject()(
     }
   }
 
+  def softDelete(id: Long) = Action.async { implicit request =>
+    postService.softDelete(id).map {
+      case (result) => Ok(Json.toJson("Success"))
+    }
+  }
+
+  def forceDelete(id: Long) = Action.async { implicit request =>
+    postService.forceDelete(id).map {
+      case (result) => Ok(Json.toJson("Success"))
+    }
+  }
+
   private def metaValueToJsValue(m: JsValue): JsResult[Any] = {
     m match {
       case JsString(s) => JsSuccess(s)
