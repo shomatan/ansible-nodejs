@@ -3,7 +3,7 @@ name := "ayumi"
 lazy val commonSettings = Seq(
   organization := "shoma.me",
   version := "0.1.0",
-  scalaVersion := "2.12.2"
+  scalaVersion := "2.12.4"
 )
 
 lazy val `ayumi` = (project in file("."))
@@ -14,7 +14,7 @@ lazy val `ayumi` = (project in file("."))
     commonSettings
   )
 
-lazy val domain = (project in file("modules/domain"))
+lazy val domain = (project in file("domain"))
   .settings(commonSettings)
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
