@@ -1,3 +1,0 @@
-[submodule "modules/domain"]
-	path = modules/domain
-	url = https://github.com/shomatan/ayumi-domain.git
