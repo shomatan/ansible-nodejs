@@ -1,0 +1,1 @@
+name := "ayumi-domain"
